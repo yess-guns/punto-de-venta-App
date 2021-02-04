@@ -1,13 +1,22 @@
 <template>
-  <v-btn  @click="logout()" block color="success">
-      Cerrar Sesion
-  </v-btn>
+  <div>
+    <Navbar />
+    <Admin />
+  </div>
+
 </template>
 
 <script>
+import Navbar from '@/components/Navbar';
+import Admin from '@/components/users/Admin';
+
 import { mapMutations } from 'vuex';
 export default {
   name: "Home",
+  components: {
+    Navbar,
+    Admin
+  },
 
   methods: {
     ...mapMutations(["validarSesion"]),
