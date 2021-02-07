@@ -19,7 +19,7 @@
           >
             <v-icon>mdi-close</v-icon>
           </v-btn>
-          <v-toolbar-title>{{nombreSubCategoria}} -- Productos</v-toolbar-title>
+          <v-toolbar-title>{{nombreCategoria}} -- Sub Categorías</v-toolbar-title>
           <v-spacer></v-spacer>
           <v-toolbar-items>
   <!--nueva sub categoria-->
@@ -38,7 +38,7 @@
         </template>
         <v-card>
           <v-card-title>
-            <span class="headline">Nuevo Producto</span>
+            <span class="headline">Nueva SubCategoría</span>
           </v-card-title>
 
           <v-card-text>
@@ -46,7 +46,7 @@
               <v-row>
                 <v-col cols="12" sm="12" md="12">
                   <v-text-field
-                    v-model="nombreProducto"
+                    v-model="nombreSubCateForm"
                     label="Nombre"
                   ></v-text-field>
                 </v-col>
@@ -75,12 +75,12 @@
           </v-toolbar-items>
         </v-toolbar>
         <v-row>
-      <v-col cols="6" sm="3" md="2" v-for="(product, index) in productos" :key="index">
-        <v-card class="mx-auto" color="#80D8FF" dark >
+      <v-col cols="6" sm="3" md="2" v-for="(subcat, index) in subCate" :key="index">
+        <v-card class="mx-auto" color="#80D8FF" dark @click="openDialogProd(subcat.productos,subcat.nombreSubCategoria)">
           <v-card-title>
           </v-card-title>
           <v-card-text class="headline black--text">
-            {{product.nombreProducto}} 
+            {{subcat.nombreSubCategoria}} 
            
           </v-card-text>
 
@@ -92,6 +92,7 @@
     </v-row>
       </v-card>
     </v-dialog>
+    <Productos ref="openDialogProdRef" />
   </v-row>
   
 </template>
@@ -99,45 +100,53 @@
 
 
 <script>
+import Productos from './Productos';
 export default {
-  name: "Productos",
+  name: "SubCategorias",
+  components: {
+    Productos
+  },
   data: () => ({
-    productos: [],
+    subCate: [],
     dialog: false,
     dialog2: false,
-    nombreProducto:"",
-    nombreSubCategoria:"",
+    nombreCategoria: "",
+    nombreSubCateForm: "",
     buttonSave : false
   }),
   computed: {},
   methods: {
-    openDialogProductos(productos, nombreSubCategoria) {
-      this.productos = productos;
-      this.nombreSubCategoria = nombreSubCategoria;
+    openDialogSubCate(subCate,nombreCategoria) {
+      this.subCate = subCate;
+      this.nombreCategoria = nombreCategoria;
+      
       this.dialog = true;
     },
     validar() {
-      if (this.nombreProducto != "") {
-        this.newProducto();
+      if (this.nombreSubCate != "") {
+        this.newSubCate();
       } else {
         swal({
           title: "Error",
-          text: "Ingresa un nombre del Producto",
+          text: "Ingresa un nombre de la Sub Categoría",
           icon: "error",
           timer: 1500,
           button: false,
         });
       }
     },
-    newProducto() {
+    newSubCate() {
       this.buttonSave = true;
-      this.productos.push({'nombreProducto':this.nombreProducto})
+      this.subCate.push({'nombreSubCategoria':this.nombreSubCateForm, 'productos':[]})
       this.close();
     },
     close(){
-      this.nombreProducto = '';
+      this.nombreSubCateForm = '';
       this.dialog2 = false;
       this.buttonSave = false;
+    },
+    openDialogProd (productos, nombreSubCategoria){
+      this.$refs.openDialogProdRef.openDialogProductos(productos,nombreSubCategoria);
     }
   },
   created(){

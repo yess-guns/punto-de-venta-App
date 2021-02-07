@@ -1,30 +1,8 @@
 <template>
-  <v-row justify="center">
-    <v-dialog
-      v-model="dialog"
-      fullscreen
-      hide-overlay
-      transition="dialog-bottom-transition"
-    >
-      
-      <v-card>
-        <v-toolbar
-          dark
-          color="primary"
-        >
-          <v-btn
-            icon
-            dark
-            @click="dialog = false"
-          >
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-          <v-toolbar-title>{{nombreSubCategoria}} -- Productos</v-toolbar-title>
-          <v-spacer></v-spacer>
-          <v-toolbar-items>
-  <!--nueva sub categoria-->
-
-            <v-dialog v-model="dialog2" max-width="500px">
+  <div>
+    <h3>
+      Categorías
+      <v-dialog v-model="dialog" max-width="500px">
         <template v-slot:activator="{ on, attrs }">
            <v-btn
             dark
@@ -38,7 +16,7 @@
         </template>
         <v-card>
           <v-card-title>
-            <span class="headline">Nuevo Producto</span>
+            <span class="headline">Nueva categoría</span>
           </v-card-title>
 
           <v-card-text>
@@ -46,7 +24,7 @@
               <v-row>
                 <v-col cols="12" sm="12" md="12">
                   <v-text-field
-                    v-model="nombreProducto"
+                    v-model="nombreCate"
                     label="Nombre"
                   ></v-text-field>
                 </v-col>
@@ -70,17 +48,17 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
-        
+      <br><br>
+    </h3>
 
-          </v-toolbar-items>
-        </v-toolbar>
-        <v-row>
-      <v-col cols="6" sm="3" md="2" v-for="(product, index) in productos" :key="index">
-        <v-card class="mx-auto" color="#80D8FF" dark >
+    <!--Categorias-->
+    <v-row>
+      <v-col cols="6" sm="3" md="2" v-for="(cat, index) in catego" :key="index">
+        <v-card class="mx-auto" color="#80D8FF" dark @click="openDialogSubC(cat.subCate,cat.nombreCategoria)">
           <v-card-title>
           </v-card-title>
           <v-card-text class="headline black--text">
-            {{product.nombreProducto}} 
+            {{cat.nombreCategoria}} 
            
           </v-card-text>
 
@@ -90,58 +68,91 @@
         </v-card>
       </v-col>
     </v-row>
-      </v-card>
-    </v-dialog>
-  </v-row>
+
+    <SubCategorias ref="openDialogSubCRef" />
   
+  </div>
 </template>
 
-
-
 <script>
+var catego = [
+  {
+    "nombreCategoria": "Platillos",
+    "subCate": [
+      {
+        "nombreSubCategoria": "Huevos",
+        "productos":[
+          {"nombreProducto": "Huevos a la mexicana"},
+          {"nombreProducto": "Huevos estrellados"}
+          
+        ]
+      },
+      {
+        "nombreSubCategoria": "Postres",
+        "productos":[]
+      }
+    ]
+  },
+  {
+    "nombreCategoria": "Bebidas alcoholica",
+    "subCate": [
+      {
+        "nombreSubCategoria": "Refrescos",
+        "productos":[]
+      },
+      {
+        "nombreSubCategoria": "Jugos",
+        "productos":[]
+      }
+    ]
+  }
+];
+import SubCategorias from './SubCategorias';
 export default {
   name: "Productos",
+  components: {
+    SubCategorias
+  },
   data: () => ({
-    productos: [],
+    catego: [],
     dialog: false,
-    dialog2: false,
-    nombreProducto:"",
-    nombreSubCategoria:"",
+    nombreCate: "",
     buttonSave : false
   }),
   computed: {},
   methods: {
-    openDialogProductos(productos, nombreSubCategoria) {
-      this.productos = productos;
-      this.nombreSubCategoria = nombreSubCategoria;
-      this.dialog = true;
-    },
     validar() {
-      if (this.nombreProducto != "") {
-        this.newProducto();
+      if (this.nombreCate != "") {
+        this.newCate();
       } else {
         swal({
           title: "Error",
-          text: "Ingresa un nombre del Producto",
+          text: "Ingresa un nombre de categoría",
           icon: "error",
           timer: 1500,
           button: false,
         });
       }
     },
-    newProducto() {
+    newCate() {
       this.buttonSave = true;
-      this.productos.push({'nombreProducto':this.nombreProducto})
+      this.catego.push({'nombreCategoria':this.nombreCate, 'subCate':[]})
       this.close();
     },
     close(){
-      this.nombreProducto = '';
-      this.dialog2 = false;
+      this.nombreCate = '';
+      this.dialog = false;
       this.buttonSave = false;
+    },
+
+    openDialogSubC (subCate,nombreCategoria){
+     this.$refs.openDialogSubCRef.openDialogSubCate(subCate,nombreCategoria);
+    
     }
   },
-  created(){
 
+  created(){
+    this.catego = catego;
   }
 };
 </script>

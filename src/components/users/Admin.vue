@@ -9,7 +9,7 @@
     >
       <v-tabs-slider></v-tabs-slider>
 
-      <v-tab href="#tab-Productos"> Productos </v-tab>
+      <v-tab href="#tab-categorias"> Categorías </v-tab>
       
       <v-tab href="#tab-otro"> Otro </v-tab>
 
@@ -17,9 +17,9 @@
 
     <v-tabs-items v-model="tab">
 
-      <v-tab-item value="tab-Productos">
+      <v-tab-item value="tab-categorias">
         <v-card flat>
-          <v-card-text> <Productos></Productos> </v-card-text>
+          <v-card-text> <categorias></categorias> </v-card-text>
         </v-card>
       </v-tab-item>
 
@@ -36,11 +36,11 @@
 </template>
 
 <script>
-import Productos from '@/views/admin/Productos.vue';
+import Categorias from '../../views/admin/Categorias.vue';
 export default {
   name: "Admin",
   components: {
-    Productos
+    Categorias
   },
   data: () => ({
     tab: null,
