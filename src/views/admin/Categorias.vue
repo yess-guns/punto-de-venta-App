@@ -109,7 +109,7 @@ var catego = [
 ];
 import SubCategorias from './SubCategorias';
 export default {
-  name: "Productos",
+  name: "Categorias",
   components: {
     SubCategorias
   },

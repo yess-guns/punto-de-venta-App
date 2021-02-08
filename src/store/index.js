@@ -19,9 +19,6 @@ export default new Vuex.Store({
               headers: {
                   Authorization: `${dataUser.token}`,
               }
-              // headers: {
-              //   'Authoriza': `Token ${dataUser.token}`
-              // }
           }
           state.auth = true;
       } else { //no esta logueado
