@@ -1,6 +1,5 @@
 <template>
   <div>
-    <Navbar />
     <Admin v-if="clave == 111" />
     <Mesero v-if="clave == 444" />
   </div>
@@ -10,14 +9,13 @@
 <script>
 import Navbar from '@/components/Navbar';
 import Admin from '@/components/users/Admin';
-import Mesero from '@/components/users/Mesero';
+
 import { mapMutations, mapState } from 'vuex';
 export default {
   name: "Home",
   components: {
     Navbar,
-    Admin,
-    Mesero
+    Admin
   },
   data: () => ({
     clave: 0,
@@ -36,8 +34,6 @@ export default {
   created(){
     this.clave = this.userData.tipo.clave;
   },
-
-
 }
 </script>
 

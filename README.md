@@ -1,4 +1,4 @@
-# acrilicos-report
+# puntodeventaApp
 
 ## Project setup
 ```

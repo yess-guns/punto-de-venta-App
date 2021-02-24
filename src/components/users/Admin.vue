@@ -1,52 +1,91 @@
 <template>
-  <v-card>
-    <v-tabs
-      v-model="tab"
-      background-color="blue lighten-1"
-      centered
-      dark
-      icons-and-text
-    >
-      <v-tabs-slider></v-tabs-slider>
+  <div>
+    <!--Navbar-->
+    <v-sheet class="overflow-hidden" >
+      <v-toolbar dark flat color="blue lighten-1">
+        <v-icon large @click="drawer = !drawer">mdi-menu</v-icon>
+        <v-toolbar-title>Los Candiles</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-btn cflat icon @click="logout()">
+          <v-icon large>mdi-logout</v-icon>
+        </v-btn>
+      </v-toolbar>
+    </v-sheet>
+    <!--Menú-->
+    <v-navigation-drawer v-model="drawer" fixed temporary
+      ><!-- Sidebar -->
+      <v-list-item>
+        <v-list-item-avatar>
+          <span class="group pa-2">
+            <v-icon large>mdi-account</v-icon>
+          </span>
+        </v-list-item-avatar>
 
-      <v-tab href="#tab-categorias"> Categorías </v-tab>
-      
-      <v-tab href="#tab-otro"> Otro </v-tab>
+        <v-list-item-content>
+          <v-list-item-title>Admin</v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
 
-    </v-tabs>
+      <v-divider></v-divider>
 
+      <v-tabs vertical v-model="tab">
+        <v-tab href="#tab-Insumos" @click="drawer = !drawer">
+          <v-icon left>
+            mdi-account
+          </v-icon>
+          Insumos
+        </v-tab>
+        <v-tab href="#tab-Option" @click="drawer = !drawer">
+          <v-icon left>
+            mdi-lock
+          </v-icon>
+          Option 2
+        </v-tab>
+      </v-tabs>
+
+      <v-footer fixed>
+        <v-col class="text-center" cols="12">
+          Footer
+        </v-col>
+      </v-footer>
+    </v-navigation-drawer>
+    <!--Elementos del menú-->
     <v-tabs-items v-model="tab">
-
-      <v-tab-item value="tab-categorias">
-        <v-card flat>
-          <v-card-text> <categorias></categorias> </v-card-text>
-        </v-card>
-      </v-tab-item>
-
-      <v-tab-item value="tab-otro">
+      <v-tab-item value="tab-Insumos">
         <v-card flat>
           <v-card-text>
-            Lol
+            <IndexInsumos />
           </v-card-text>
         </v-card>
       </v-tab-item>
-      
-    </v-tabs-items>
-  </v-card>   
+      <v-tab-item value="tab-Option">
+        <v-card flat>
+          <v-card-text> Lol </v-card-text>
+        </v-card>
+      </v-tab-item>
+    </v-tabs-items> 
+  </div>
 </template>
 
 <script>
-import Categorias from '../../views/admin/Categorias.vue';
+import { mapMutations } from 'vuex';
+import IndexInsumos from '@/views/admin/insumos/Index';
 export default {
   name: "Admin",
   components: {
-    Categorias
+    IndexInsumos
   },
   data: () => ({
     tab: null,
+    drawer: null
   }),
   computed: {},
   methods: {
+    ...mapMutations(["validarSesion"]),
+    logout() {
+      localStorage.clear();
+      this.validarSesion();
+    },
   },
 };
 </script>

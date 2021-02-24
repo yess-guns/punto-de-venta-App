@@ -22,7 +22,7 @@ export default {
   props: ["user"],
   computed: {},
   methods: {
-      ...mapMutations(["validarSesion"]),
+    ...mapMutations(["validarSesion"]),
     logout() {
       localStorage.clear();
       this.validarSesion();

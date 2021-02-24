@@ -51,104 +51,107 @@ import { mapMutations, mapState } from "vuex";
 
 
 export default {
-    name: "Login",
-    computed: {
-    ...mapState(["auth","BASE_URL"]),
-    }, 
-    methods: {
-        ...mapMutations(["validarSesion"]),
-        validate(){
-        if (this.$refs.form.validate()) {
-            this.login();
-            }
-        },
-        async login(){
-            this.valid = false;
-            const path = `${this.BASE_URL}login/validated/`;
-            let datos = new FormData();
-            datos.append("email", this.email);
-            datos.append("password", this.password);
-            datos.append("ip", this.ip);
-            datos.append("pais", this.pais);
-            datos.append("region", this.region);
-            try {
-                let res = await axios.post(path, datos);
-                this.valid = true;
-                console.log(res.data);
-                var data = res.data;
-                if (data.res == 'OK') {
-                  if (data.token != "") {
-                  localStorage.setItem("Usuario-pdv", JSON.stringify(data.user));
-                  swal({
-                      title: "Sesión iniciada",
-                      text: "   ",
-                      icon: "success",
-                      timer: 1800,
-                      button: false,
-                  });
-                  this.validarSesion();
-                  //console.log(data);
-                  } else if (data.token == "") {
-                    swal({
-                        title: "Usuario o contraseña incorrectos",
-                        text: "   ",
-                        icon: "error",
-                        timer: 1500,
-                        button: false,
-                    });
-                  }
-                }else{
-                  swal({
-                title: "¡Error!",
-                text: "Error en el servidor, comuniquese a soporte",
-                icon: "error",
-                timer: 3000,
-                button: false,
-                });
-                this.valid = true;
-                }
-            } catch (error) {
-                swal({
-                title: "¡Error!",
-                text: "Revise su conexión o comuniquese a soporte",
-                icon: "error",
-                timer: 3000,
-                button: false,
-                });
-                this.valid = true;
-            }
-        },
-        getIP() {
-            axios
-            .get("https://ipapi.co/json/")
-            .then((res) => {
-            this.ip = res.data.ip;
-            this.pais = res.data.city;
-            this.region = res.data.region;
-            })
-            .catch((error) => {
-            this.respuesta = error;
-            });
-        },
-    },
-    data: () => ({
-    dialog: true,
-    valid: true,
-    validCerrar: true,
-    email: "",
-    emailRules: [
-      (v) => !!v || "Correo requerido",
-      (v) => /.+@.+\..+/.test(v) || "El correo debe ser valido",
-    ],
-    password: "",
-    passRules: [
-      (v) => !!v || "Contraseña requerida",
-      (v) => (v && v.length > 8) || "Contraseña corta",
-    ],
-    ip: "",
-    pais: "",
-    region: "",
+  name: "Login",
+  data: () => ({
+  dialog: true,
+  valid: true,
+  validCerrar: true,
+  email: "",
+  emailRules: [
+    (v) => !!v || "Correo requerido",
+    (v) => /.+@.+\..+/.test(v) || "El correo debe ser valido",
+  ],
+  password: "",
+  passRules: [
+    (v) => !!v || "Contraseña requerida",
+    (v) => (v && v.length > 8) || "Contraseña corta",
+  ],
+  ip: "",
+  pais: "",
+  region: "",
   }),
+  created(){
+    this.getIP();
+  },
+  computed: {
+  ...mapState(["auth","BASE_URL"]),
+  }, 
+  methods: {
+    ...mapMutations(["validarSesion"]),
+    validate(){
+    if (this.$refs.form.validate()) {
+        this.login();
+        }
+    },
+    async login(){
+        this.valid = false;
+        const path = `${this.BASE_URL}login/validated/`;
+        let datos = new FormData();
+        datos.append("email", this.email);
+        datos.append("password", this.password);
+        datos.append("ip", this.ip);
+        datos.append("pais", this.pais);
+        datos.append("region", this.region);
+        try {
+            let res = await axios.post(path, datos);
+            this.valid = true;
+            console.log(res.data);
+            var data = res.data;
+            if (data.res == 'OK') {
+              if (data.token != "") {
+              localStorage.setItem("Usuario-pdv", JSON.stringify(data.user));
+              swal({
+                  title: "Sesión iniciada",
+                  text: "   ",
+                  icon: "success",
+                  timer: 1800,
+                  button: false,
+              });
+              this.validarSesion();
+              //console.log(data);
+              } else if (data.token == "") {
+                swal({
+                    title: "Usuario o contraseña incorrectos",
+                    text: "   ",
+                    icon: "error",
+                    timer: 1500,
+                    button: false,
+                });
+              }
+            }else{
+              swal({
+            title: "¡Error!",
+            text: "Error en el servidor, comuniquese a soporte",
+            icon: "error",
+            timer: 3000,
+            button: false,
+            });
+            this.valid = true;
+            }
+        } catch (error) {
+            swal({
+            title: "¡Error!",
+            text: "Revise su conexión o comuniquese a soporte",
+            icon: "error",
+            timer: 3000,
+            button: false,
+            });
+            this.valid = true;
+        }
+    },
+    getIP() {
+      axios
+      .get("https://ipapi.co/json/")
+      .then((res) => {
+      this.ip = res.data.ip;
+      this.pais = res.data.city;
+      this.region = res.data.region;
+      })
+      .catch((error) => {
+      this.respuesta = error;
+      });
+    },
+  },
 };
 
 </script>
