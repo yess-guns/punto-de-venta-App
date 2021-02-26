@@ -13,7 +13,8 @@ export default new Vuex.Store({
       'unidades' : [],
       'medidas' : [],
       'categorias' : [],
-    }
+    },
+    categoriasPro: []
   },
   mutations: {
     validarSesion(state) {
@@ -34,6 +35,9 @@ export default new Vuex.Store({
     },
     saveDataFormInsumo(state, payload){
       state.dataFormInsumo[payload[0]] = payload[1];
+    },
+    saveCategorias(state, payload){
+      state.categoriasPro = payload['categorias'];
     }
   },
   actions: {

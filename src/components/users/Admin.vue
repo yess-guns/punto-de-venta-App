@@ -61,7 +61,7 @@
       <v-tab-item value="tab-Productos">
         <v-card flat>
           <v-card-text>
-            Productos
+            <IndexIProductos />
           </v-card-text>
         </v-card>
       </v-tab-item>
@@ -72,10 +72,12 @@
 <script>
 import { mapMutations } from 'vuex';
 import IndexInsumos from '@/views/admin/insumos/Index';
+import IndexIProductos from '@/views/admin/productos/Index';
 export default {
   name: "Admin",
   components: {
-    IndexInsumos
+    IndexInsumos,
+    IndexIProductos
   },
   data: () => ({
     tab: null,
