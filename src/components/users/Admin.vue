@@ -35,11 +35,11 @@
           </v-icon>
           Insumos
         </v-tab>
-        <v-tab href="#tab-Option" @click="drawer = !drawer">
+        <v-tab href="#tab-Productos" @click="drawer = !drawer">
           <v-icon left>
             mdi-lock
           </v-icon>
-          Option 2
+          Productos
         </v-tab>
       </v-tabs>
 
@@ -58,9 +58,11 @@
           </v-card-text>
         </v-card>
       </v-tab-item>
-      <v-tab-item value="tab-Option">
+      <v-tab-item value="tab-Productos">
         <v-card flat>
-          <v-card-text> Lol </v-card-text>
+          <v-card-text>
+            Productos
+          </v-card-text>
         </v-card>
       </v-tab-item>
     </v-tabs-items> 

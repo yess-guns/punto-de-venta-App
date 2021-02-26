@@ -9,6 +9,11 @@ export default new Vuex.Store({
     AuthToken: {},
     BASE_URL: 'http://localhost/puntodeventaAPI/',
     auth: false,
+    dataFormInsumo: {
+      'unidades' : [],
+      'medidas' : [],
+      'categorias' : [],
+    }
   },
   mutations: {
     validarSesion(state) {
@@ -26,6 +31,9 @@ export default new Vuex.Store({
           state.AuthToken = {}
           state.auth = false;
       }
+    },
+    saveDataFormInsumo(state, payload){
+      state.dataFormInsumo[payload[0]] = payload[1];
     }
   },
   actions: {

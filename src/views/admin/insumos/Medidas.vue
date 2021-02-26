@@ -106,7 +106,7 @@
 
 <script>
 import axios from "axios";
-import { mapState } from "vuex";
+import { mapState, mapMutations } from "vuex";
 export default {
   name: "Medidas",
   components: {
@@ -135,6 +135,7 @@ export default {
     ...mapState(["BASE_URL","AuthToken"]),
   },
   methods: {
+    ...mapMutations(["saveDataFormInsumo"]),
     async getMedidas() {
       this.loading = true;
       this.medidas = [];
@@ -145,6 +146,7 @@ export default {
         let data = res.data;
         if (res.data.status == 'OK') {
           this.medidas = data.res;
+          this.saveDataFormInsumo(['medidas',this.medidas])
           this.loading = false;
         } else {
           

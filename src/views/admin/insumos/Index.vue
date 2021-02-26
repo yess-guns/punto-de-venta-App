@@ -26,7 +26,7 @@ export default {
     Unidades,
     Medidas 
   },
-  name: "Encargado",
+  name: "IndexInsumos",
   data: () => ({
     tab: null,
   }),

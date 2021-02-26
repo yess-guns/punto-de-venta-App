@@ -106,7 +106,7 @@
 
 <script>
 import axios from "axios";
-import { mapState } from "vuex";
+import { mapMutations, mapState } from "vuex";
 export default {
   name: "Unidades",
   components: {
@@ -135,6 +135,7 @@ export default {
     ...mapState(["BASE_URL","AuthToken"]),
   },
   methods: {
+    ...mapMutations(["saveDataFormInsumo"]),
     async getUnidades() {
       this.loading = true;
       this.unidades = [];
@@ -145,6 +146,7 @@ export default {
         let data = res.data;
         if (res.data.status == 'OK') {
           this.unidades = data.res;
+          this.saveDataFormInsumo(['unidades',this.unidades])
           this.loading = false;
         } else {
           

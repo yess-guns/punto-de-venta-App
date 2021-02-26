@@ -106,9 +106,9 @@
 
 <script>
 import axios from "axios";
-import { mapState } from "vuex";
+import { mapState, mapMutations } from "vuex";
 export default {
-  name: "Categorias",
+  name: "CategoriasInsumos",
   components: {
   },
   data: () => ({
@@ -135,6 +135,7 @@ export default {
     ...mapState(["BASE_URL","AuthToken"]),
   },
   methods: {
+    ...mapMutations(["saveDataFormInsumo"]),
     async getCategorias() {
       this.loading = true;
       this.categorias = [];
@@ -145,6 +146,7 @@ export default {
         let data = res.data;
         if (res.data.status == 'OK') {
           this.categorias = data.res;
+          this.saveDataFormInsumo(['categorias',this.categorias])
           this.loading = false;
         } else {
           this.loading = false;
