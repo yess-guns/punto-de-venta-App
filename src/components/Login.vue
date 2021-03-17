@@ -95,10 +95,11 @@ export default {
         try {
             let res = await axios.post(path, datos);
             this.valid = true;
-            console.log(res.data);
+            //console.log(res.data);
             var data = res.data;
             if (data.res == 'OK') {
-              if (data.token != "") {
+              console.log(data.user)
+              if (data.user.token != "") {
               localStorage.setItem("Usuario-pdv", JSON.stringify(data.user));
               swal({
                   title: "Sesión iniciada",
@@ -109,7 +110,7 @@ export default {
               });
               this.validarSesion();
               //console.log(data);
-              } else if (data.token == "") {
+              } else if (data.user.token == "") {
                 swal({
                     title: "Usuario o contraseña incorrectos",
                     text: "   ",
@@ -129,6 +130,7 @@ export default {
             this.valid = true;
             }
         } catch (error) {
+          console.log(error)
             swal({
             title: "¡Error!",
             text: "Revise su conexión o comuniquese a soporte",

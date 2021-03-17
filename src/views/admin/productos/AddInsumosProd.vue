@@ -1,0 +1,386 @@
+<template>
+  <div>
+    <!-- Modal add Insumos productos -->
+    <v-row justify="center">
+      <v-dialog
+        v-model="dialog"
+        persistent
+        fullscreen
+        hide-overlay
+        transition="dialog-top-transition"
+      >
+        <v-card>
+          <v-toolbar
+            dark
+            color="#7986CB"
+          >
+            <v-btn
+              icon
+              dark
+              @click="dialog = false"
+            >
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+            <v-toolbar-title>Agregar insumos a: {{ nombreProducto }}</v-toolbar-title>
+            <v-spacer></v-spacer>
+            <v-toolbar-items>
+              <template>
+                <div class="text-center mt-3">
+                  <v-btn
+                    rounded
+                    color="success"
+                    dark
+                    @click="valid"
+                  >
+                    Guardar
+                  </v-btn>
+                </div>
+              </template>
+              
+            </v-toolbar-items>
+          </v-toolbar>
+          <!-- Form-->
+          <v-card-text>
+            <v-container>
+              <v-row>
+                <h2>Receta</h2>
+                <v-col cols="12" sm="12" md="4" >
+                  <v-text-field
+                    v-model="formInsumo.nombre"
+                    label="Nombre"
+                    disabled
+                  ></v-text-field>
+                  <v-btn color="#FF9100" @click="dialogInsumo = true">
+                    Elegir
+                  </v-btn>
+                </v-col>
+                <v-col cols="12" sm="12" md="4" >
+                  <v-text-field
+                    v-model="formInsumo.cantidad"
+                    label="Cantidad"
+                  ></v-text-field>{{ formInsumo.medida == '' ? 'unidad' : formInsumo.medida}}
+                </v-col>
+                <v-col cols="12" sm="12" md="3" >
+                  <v-btn color="error" @click="resetFormIn">
+                    Cancelar
+                  </v-btn>
+                  <v-btn color="primary" @click="addInsumo(formInsumo)" :disabled="parseInt(formInsumo.cantidad) > 0  ? false : true">
+                    Agregar
+                  </v-btn>
+                </v-col>
+                <v-col cols="12" sm="12">
+                  <v-data-table
+                    :headers="headersInSel"
+                    :items="insumosSelect"
+                    :items-per-page="10"
+                    class="elevation-1"
+                  >
+                    <template v-slot:top>
+                      <h2>Insumos</h2>
+                    </template>
+                    <template v-slot:[`item.action`]="{ item }">
+                      <div>
+                         <v-icon @click="deleteInsumo(item)">
+                          mdi-delete
+                        </v-icon>
+                      </div>
+                    </template>
+                  </v-data-table>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
+    </v-row>
+    <!--Modal Tabla Insumo-->
+    <v-dialog v-model="dialogInsumo" max-width="750px">
+      <v-card>
+        <v-card-title>
+        <h2>
+          Insumos
+          <v-btn
+            icon
+            color="green"
+            @click="getInsumos"
+          >
+            <v-icon>mdi-cached</v-icon>
+          </v-btn>
+        </h2>
+        </v-card-title>
+
+        <v-card-text>
+          <v-data-table
+            :headers="headersIn"
+            :items="insumos"
+            :items-per-page="5"
+            class="elevation-1"
+            :loading="loadingIn"
+            :search="search"
+          >
+            <template v-slot:top>
+              <v-col md="4">
+                <v-text-field
+                  v-model="search"
+                  label="Búsqueda"
+                ></v-text-field>
+              </v-col>
+            </template>
+            <template v-slot:[`item.action`]="{ item }">
+              <div @click="insumoElegido(item)">
+                <v-btn color="success">Agregar</v-btn>
+              </div>
+            </template>
+          </v-data-table>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+  </div>
+</template>
+
+<script>
+import axios from "axios";
+import { mapState } from "vuex";
+export default {
+  name: "AddInsumosProd",
+  components: {
+  },
+  data: () => ({
+    id_producto: 0,
+    nombreProducto: '',
+
+    //dialog
+    dialog: false,
+    
+    loadingSelect: false,
+    buttonSave: false,
+    //Insumos
+    headersIn: [
+      { text: "ID", value: "id_insumo" },
+      { text: "Nombre", value: "nombreInsumo" },
+      { text: "Unidad", value: "nombreUnidad" },
+      { text: "Medida", value: "nombreMedida" },
+      { text: "Categoria", value: "nombreCategoriaIn" },
+      { text: "Acción", value: "action" },
+      // { text: "Stock Min x unidad", value: "stockMinUnidad" },
+      // { text: "Stock Min x Medida", value: "stockMinMedida" },
+      // { text: "Stock Inventario", value: "stockInventario" }
+    ],
+    insumos: [],
+    search: "",
+    //dialog
+    insumo: {},
+    loadingIn: false,
+    dialogInsumo: false,
+    formInsumo: {
+      id_insumo: "",
+      nombre: "",
+      cantidad: "",
+      medida: ""
+    },
+    formInsumoDef: {
+      id_insumo: "",
+      nombre: "",
+      cantidad: "",
+      medida: ""
+    },
+    headersInSel: [
+      //{ text: "ID", value: "id_insumo" },
+      { text: "Nombre", value: "nombreInsumo" },
+      { text: "Cantidad", value: "cantidad" },
+      { text: "Unidad", value: "nombreUnidad" },
+      { text: "Eliminar", value: "action" },
+    ],
+    insumosSelect: []
+  }),
+  created(){
+    //this.getProductos();
+    this.getInsumos();
+  },
+  computed: {
+    ...mapState(["BASE_URL","AuthToken", "categoriasPro"]),
+  },
+  methods: {
+    showModal(id_producto, nombreProducto){
+      this.id_producto = id_producto;
+      this.nombreProducto = nombreProducto;
+      this.dialog = true;
+    },
+    valid(){
+      if(this.insumosSelect.length > 0){
+        //this.addInsumosProducto(); --Aun falta
+        
+      }else{
+        this.alert('No se han elegido insumos',' ','warning', 3000);
+      }
+    },
+    async addInsumosProducto() {
+      this.buttonSave = true;
+      const path = `${this.BASE_URL}productos/addInsumosProducto/`;
+      let data = new FormData();
+      data.append("form", JSON.stringify(this.form));
+      try {
+        let res = await axios.post(path, data, this.AuthToken);
+        console.log(res.data);
+        let dat = res.data;
+        switch (dat.status) {
+          case 'existing':
+            this.alert('¡Ya existe!',' ','warning', 2000);
+            break;
+
+          case 'OK':
+            this.alert('¡Guardado!',' ','success', 2000);
+            this.resetForm();
+            this.resetFormIn();
+            this.$emit('refresh');
+            this.dialog = false;
+            this.insumosSelect = [];
+            break;
+
+          case 0:
+            this.alert('Precausión!','Se guardo con éxito pero ocurrio un error al guardar sus insumos','warning', 3000);
+            this.resetForm();
+            this.resetFormIn();
+            this.$emit('refresh');
+            this.dialog = false;
+            this.insumosSelect = [];
+            break;
+
+          case 'error':
+            this.alert('¡Error!','Intentelo de nuevo o comuníquese con soporte','error', 2000);
+            break;
+        
+          default:
+            break;
+        }
+        
+      } catch (error) {
+        console.log(error)
+        this.alert('Error!','Revise su conexión o comuniquese a soporte','error', 2000);
+      }
+      this.buttonSave = false;
+    },
+    resetForm(){
+      this.form = JSON.parse(JSON.stringify(this.formDefault));
+    },
+
+
+
+
+
+
+
+
+
+
+
+
+    openDialogEdit(item){
+      this.id_producto = item.id_producto;
+      this.nombrePEdit = item.nombreProducto;
+      this.dialogEdit = true;
+
+    },
+    validEdit(){
+      if(this.nombrePEdit != ''){
+        this.editProducto();
+      }else{
+        this.alert('Ingrese un nombre!',' ','warning', 3000);
+      }
+    },
+    async editProducto() {
+      this.buttonSaveEdit = true;
+      const path = `${this.BASE_URL}productos/editProducto/`;
+      let data = new FormData();
+      data.append("id_producto", this.id_producto);
+      data.append("nombrePEdit", this.nombrePEdit);
+      try {
+        let res = await axios.post(path, data, this.AuthToken);
+        console.log(res.data);
+        let dat = res.data;
+        switch (dat.status) {
+          case 'existing':
+            this.alert('¡Ya existe!',' ','warning', 2000);
+            break;
+
+          case 'OK':
+            this.alert('¡Guardado!',' ','success', 2000);
+            this.nombrePEdit = '';
+            this.dialogEdit = false;
+            this.getProductos();
+            break;
+
+          case 'error':
+            this.alert('¡Error!','Intentelo de nuevo o comuníquese con soporte','error', 2000);
+            break;
+        
+          default:
+            break;
+        }
+      } catch (error) {
+        console.log(error)
+        this.alert('Error!','Revise su conexión o comuniquese a soporte','error', 2000);
+      }
+      this.buttonSaveEdit = false;
+    },
+    async getInsumos() {
+      this.loadingIn = true;
+      this.insumos = [];
+      const path = `${this.BASE_URL}insumos/getInsumos/`;
+      try {
+        let res = await axios.get(path, this.AuthToken);
+        console.log(res.data);
+        let data = res.data;
+        if (res.data.status == 'OK') {
+          this.insumos = data.res;
+          this.loadingIn = false;
+        } else {
+          this.loadingIn = false;
+        }
+      } catch (error) {
+        console.log(error)
+        this.alert('Error!','Revise su conexión o comuniquese a soporte','error', 2000);
+        this.loadingIn = false;
+      }
+    },
+    insumoElegido(item){
+      this.search = '';
+      this.formInsumo.id_insumo = item.id_insumo;
+      this.formInsumo.nombre = item.nombreInsumo;
+      this.formInsumo.medida = item.nombreMedida;
+      this.dialogInsumo = false;
+    },
+    resetFormIn(){
+      this.formInsumo = JSON.parse(JSON.stringify(this.formInsumoDef));
+    },
+    addInsumo(form){
+      var index = this.insumosSelect.findIndex(insumo => insumo.id_insumo == form.id_insumo);
+      if(index == -1){
+        this.insumosSelect.push(
+          {'id_insumo': form.id_insumo, 'nombreInsumo': form.nombre, 'cantidad': form.cantidad, 'nombreUnidad': form.medida}
+        );
+        this.resetFormIn();
+      }else{
+        this.alert('El insumo ya se encuentra agregado',' ','warning', 2000);
+      }
+    },
+    deleteInsumo(item){
+      var index = this.insumosSelect.findIndex(insumo => insumo.id_insumo == item.id_insumo);
+      console.log(index)
+      this.insumosSelect.splice(index, 1);
+    },
+    details(formProducto){
+      this.$refs.detailsModal.showModal(formProducto);
+    },
+    alert(title, text, icon, timer){
+      swal({
+        title: title,
+        text: text,
+        icon: icon,
+        timer: timer,
+        button: false,
+      });
+    }
+  },
+};
+</script>

@@ -1,36 +1,58 @@
 <template>
-  <v-card>
-    <v-card-title>
-      Categorias
-      <v-btn
-        class="mx-3"
-        fab
-        dark
-        color="green"
-        @click="dialog = !dialog"
-      >
-        <v-icon dark>
-          mdi-plus
-        </v-icon>
-      </v-btn>
-      <v-spacer></v-spacer>
-    </v-card-title>
-    
-    <v-data-table
-      :headers="headers"
-      :items="categorias"
-      :items-per-page="5"
-      class="elevation-1"
-      :loading="loading"
-    >
-      <template v-slot:[`item.nombrecategoriaPro`]="{ item }">
-        <div @click="openDialogEdit(item)">
-          {{ `${ item.nombrecategoriaPro}` }}
-        </div>
-      </template>
-    </v-data-table>
+  <div>
+    <v-card>
+      <v-card-title>
+        Categorias
+        <v-btn
+          class="mx-3"
+          fab
+          dark
+          color="green"
+          @click="dialog = !dialog"
+        >
+          <v-icon dark>
+            mdi-plus
+          </v-icon>
+        </v-btn>
+        <v-spacer></v-spacer>
+      </v-card-title>
+      <v-card :loading="loading">
+        <template slot="progress">
+          <v-progress-linear
+            color="primary"
+            height="5"
+            indeterminate
+          ></v-progress-linear>
+          <p class="text-center text--disabled" disabled>Cargando...</p>
+        </template>
+      </v-card>
+
+      <v-row>
+        <v-col
+          v-for="(item, i) in categorias"
+          cols="6"
+          sm="3"
+          md="2"
+          :key="i" 
+        >
+          <v-card
+            class="mx-auto"
+            color="#FF6D00"
+            dark
+            @click="modalProd(item)"
+          >
+            <v-card-title class="white--text">
+              <div class="text-h5">
+                  {{ `${item.nombrecategoriaPro}` }}
+              </div>
+              
+            </v-card-title>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-card>
     <!--Modal Nueva categoria-->
-    <v-dialog v-model="dialog" max-width="500px">
+    <v-dialog v-model="dialog" persistent max-width="500px">
       <v-card>
         <v-card-title>
         <span>Nueva Categoria</span>
@@ -65,51 +87,18 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <!--Modal Editar categoria-->
-    <v-dialog v-model="dialogEdit" max-width="500px">
-      <v-card>
-        <v-card-title>
-        <span>Editar Categoria</span>
-        </v-card-title>
-
-        <v-card-text>
-          <v-container>
-            <v-row>
-              <v-col cols="12" sm="12" md="12">
-                <v-text-field
-                  v-model="nombreCEdit"
-                  label="Nombre"
-                ></v-text-field>
-              </v-col>
-            </v-row>
-          </v-container>
-        </v-card-text>
-
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="dialogEdit = !dialogEdit">
-              Cancelar
-          </v-btn>
-          <v-btn
-            :disabled="buttonSaveEdit"
-            color="blue darken-1"
-            text
-            @click="validEdit()"
-          >
-            Guardar
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-  </v-card>
+    <Productos ref="productos" @refresh="getCategorias" />
+  </div>
 </template>
 
 <script>
+import Productos from '@/views/admin/productos/Productos.vue';
 import axios from "axios";
 import { mapState, mapMutations } from "vuex";
 export default {
   name: "CategoriasProductos",
   components: {
+    Productos
   },
   data: () => ({
     headers: [
@@ -117,15 +106,11 @@ export default {
       { text: "Nombre", value: "nombrecategoriaPro" },
     ],
     categorias: [],
-    loading: false,
+    loading: true,
     dialog: false,
     nombreC: '',
     buttonSave: false,
-    //dialog edit
-    dialogEdit: false,
-    nombreCEdit: '',
-    buttonSaveEdit: false,
-    id_categoriaPro: 0
+    
   }),
   created(){
     this.getCategorias();
@@ -198,53 +183,8 @@ export default {
       }
       this.buttonSave = false;
     },
-    openDialogEdit(item){
-      this.id_categoriaPro = item.id_categoriaPro;
-      this.nombreCEdit = item.nombrecategoriaPro;
-      this.dialogEdit = true;
-
-    },
-    validEdit(){
-      if(this.nombreCEdit != ''){
-        this.editCategoria();
-      }else{
-        this.alert('Ingrese un nombre!',' ','warning', 3000);
-      }
-    },
-    async editCategoria() {
-      this.buttonSaveEdit = true;
-      const path = `${this.BASE_URL}productos/editCategoria/`;
-      let data = new FormData();
-      data.append("id_categoriaPro", this.id_categoriaPro);
-      data.append("nombreCEdit", this.nombreCEdit);
-      try {
-        let res = await axios.post(path, data, this.AuthToken);
-        console.log(res.data);
-        let dat = res.data;
-        switch (dat.status) {
-          case 'existing':
-            this.alert('¡Ya existe!',' ','warning', 2000);
-            break;
-
-          case 'OK':
-            this.alert('¡Guardado!',' ','success', 2000);
-            this.nombreCEdit = '';
-            this.dialogEdit = false;
-            this.getCategorias();
-            break;
-
-          case 'error':
-            this.alert('¡Error!','Intentelo de nuevo o comuníquese con soporte','error', 2000);
-            break;
-        
-          default:
-            break;
-        }
-      } catch (error) {
-        console.log(error)
-        this.alert('Error!','Revise su conexión o comuniquese a soporte','error', 2000);
-      }
-      this.buttonSaveEdit = false;
+    modalProd(categoria){
+      this.$refs.productos.showProductos(categoria);
     },
     alert(title, text, icon, timer){
       swal({
