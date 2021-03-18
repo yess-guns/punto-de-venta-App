@@ -9,13 +9,15 @@
 <script>
 import Navbar from '@/components/Navbar';
 import Admin from '@/components/users/Admin';
+import Mesero from '@/components/users/Mesero';
 
 import { mapMutations, mapState } from 'vuex';
 export default {
   name: "Home",
   components: {
     Navbar,
-    Admin
+    Admin,
+    Mesero
   },
   data: () => ({
     clave: 0,

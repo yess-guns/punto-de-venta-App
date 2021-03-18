@@ -1,41 +1,27 @@
 <template>
-  <v-card>
-    <v-tabs
-      v-model="tab"
-      background-color="blue lighten-1"
-      centered
-      dark
-      icons-and-text
-    >
-      <v-tabs-slider></v-tabs-slider>
-
-      <v-tab href="#tab-mesas"> Mesas </v-tab>
-
-    </v-tabs>
-
-    <v-tabs-items v-model="tab">
-
-      <v-tab-item value="tab-mesas">
-        <v-card flat>
-          <v-card-text> <Mesas />  </v-card-text>
-        </v-card>
-      </v-tab-item>
-      
-    </v-tabs-items>
-  </v-card>   
+  <div>
+   <Navbar :user="userData.tipo.tipoNombre" />
+   <Mesas />
+  </div>
 </template>
 
 <script>
+import {mapState} from 'vuex';
+import Navbar from '../Navbar';
 import Mesas from '../../views/mesero/Mesas.vue';
 export default {
   name: "Mesero",
   components: {
-    Mesas
+    Navbar,
+    Mesas,
+    Navbar
   },
   data: () => ({
     tab: null,
   }),
-  computed: {},
+  computed: {
+    ...mapState(["userData"])
+  },
   methods: {
   },
 };

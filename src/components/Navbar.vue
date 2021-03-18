@@ -2,7 +2,7 @@
   <div>
     <v-sheet class="overflow-hidden" >
         <v-toolbar dark flat color="blue lighten-1">
-          <v-toolbar-title>Los Candiles</v-toolbar-title>
+          <v-toolbar-title>Los Candiles || {{ user }}</v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn cflat icon @click="logout()">
             <v-icon large>mdi-logout</v-icon>
