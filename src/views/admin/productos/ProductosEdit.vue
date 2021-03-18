@@ -30,6 +30,7 @@
                   color="success"
                   dark
                   @click="valid"
+                  :disabled="buttonSave"
                 >
                   Guardar
                 </v-btn>
@@ -46,6 +47,7 @@
                 <v-text-field
                   v-model="form.nombreP"
                   label="Nombre"
+                  @change="buttonSave = false"
                 ></v-text-field>
               </v-col>
               <v-col cols="12" sm="6" md="3">
@@ -56,6 +58,7 @@
                   label="Elige una categoria"
                   item-text="nombrecategoriaPro"
                   color="indigo"
+                  @change="buttonSave = false"
                 >
                 </v-autocomplete>
               </v-col>
@@ -63,6 +66,7 @@
                 <v-text-field
                   v-model="form.precio"
                   label="Precio"
+                  @change="buttonSave = false"
                 ></v-text-field>
               </v-col>
               <v-col cols="12" sm="6" md="3">
@@ -72,6 +76,7 @@
                   item-value="id_destino"
                   item-text="nombreDestino"
                   label="Destino"
+                  @change="buttonSave = false"
                 ></v-select>
               </v-col>
             </v-row>
@@ -79,7 +84,7 @@
               <v-col cols="12" sm="12">
                 <v-data-table
                   :headers="headersInSel"
-                  :items="insumosSelect"
+                  :items="insumosProducto"
                   :items-per-page="10"
                   class="elevation-1"
                   :loading="loading"
@@ -161,7 +166,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <AddInsumosProd ref="addInsumos" />
+    <AddInsumosProd ref="addInsumos" @refresh="getInsumos" />
   </v-row>
 </template>
 
@@ -192,6 +197,7 @@ export default {
       precio: '',
       destino: null
     },
+    buttonSave: true,
     headersInSel: [
       //{ text: "ID", value: "id_insumo" },
       { text: "Nombre", value: "nombreInsumo" },
@@ -199,7 +205,7 @@ export default {
       { text: "Unidad", value: "nombreMedida" },
       { text: "Status", value: "action" },
     ],
-    insumosSelect:[],
+    insumosProducto:[],
     loading: false,
     destinos: [
       {'id_destino' : "1", 'nombreDestino': 'Cocina'},
@@ -228,6 +234,7 @@ export default {
       this.form.destino = dataProd.id_destino;
       this.form.tipo = dataProd.id_tipoPoducto;
       this.dialog = true;
+      this.buttonSave = true;
       this.getInsumos();
       //console.log(dataProd)
     },
@@ -243,7 +250,6 @@ export default {
       }
     },
     async editProducto() {
-      console.log('jajaja')
       this.buttonSave = true;
       const path = `${this.BASE_URL}productos/editProducto/`;
       let data = new FormData();
@@ -279,14 +285,14 @@ export default {
     },
     async getInsumos() {
       this.loading = true;
-      this.insumosSelect = [];
+      this.insumosProducto = [];
       const path = `${this.BASE_URL}insumos/getInsumosProduc/${this.form.id}`;
       try {
         let res = await axios.get(path, this.AuthToken);
         //console.log(res.data);
         let data = res.data;
         if (res.data.status == 'OK') {
-          this.insumosSelect = data.res;
+          this.insumosProducto = data.res;
           this.loading = false;
         } else {
           this.loading = false;

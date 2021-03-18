@@ -31,6 +31,7 @@
                     color="success"
                     dark
                     @click="valid"
+                    :disabled="buttonSave"
                   >
                     Guardar
                   </v-btn>
@@ -146,13 +147,10 @@ export default {
   components: {
   },
   data: () => ({
+    //dialog-principal
     id_producto: 0,
     nombreProducto: '',
-
-    //dialog
     dialog: false,
-    
-    loadingSelect: false,
     buttonSave: false,
     //Insumos
     headersIn: [
@@ -161,15 +159,12 @@ export default {
       { text: "Unidad", value: "nombreUnidad" },
       { text: "Medida", value: "nombreMedida" },
       { text: "Categoria", value: "nombreCategoriaIn" },
-      { text: "Acción", value: "action" },
-      // { text: "Stock Min x unidad", value: "stockMinUnidad" },
-      // { text: "Stock Min x Medida", value: "stockMinMedida" },
-      // { text: "Stock Inventario", value: "stockInventario" }
+      { text: "Acción", value: "action" }
     ],
-    insumos: [],
+    insumos: [], //todos los insumos
     search: "",
-    //dialog
-    insumo: {},
+
+    //dialog-insumos-a-elegir
     loadingIn: false,
     dialogInsumo: false,
     formInsumo: {
@@ -194,21 +189,28 @@ export default {
     insumosSelect: []
   }),
   created(){
-    //this.getProductos();
     this.getInsumos();
   },
   computed: {
-    ...mapState(["BASE_URL","AuthToken", "categoriasPro"]),
+    ...mapState(["BASE_URL","AuthToken"]),
   },
   methods: {
+    //Modal principal
     showModal(id_producto, nombreProducto){
-      this.id_producto = id_producto;
-      this.nombreProducto = nombreProducto;
+      if(this.id_producto == id_producto){
+        //hacer nada
+      }else{
+        this.id_producto = id_producto;
+        this.nombreProducto = nombreProducto;
+        this.resetFormIn();
+        this.insumosSelect = [];
+      }
+      
       this.dialog = true;
     },
     valid(){
       if(this.insumosSelect.length > 0){
-        //this.addInsumosProducto(); --Aun falta
+        this.addInsumosProducto();
         
       }else{
         this.alert('No se han elegido insumos',' ','warning', 3000);
@@ -218,7 +220,8 @@ export default {
       this.buttonSave = true;
       const path = `${this.BASE_URL}productos/addInsumosProducto/`;
       let data = new FormData();
-      data.append("form", JSON.stringify(this.form));
+      data.append("id_producto", JSON.stringify(this.id_producto));
+      data.append("insumos", JSON.stringify(this.insumosSelect));
       try {
         let res = await axios.post(path, data, this.AuthToken);
         console.log(res.data);
@@ -230,17 +233,6 @@ export default {
 
           case 'OK':
             this.alert('¡Guardado!',' ','success', 2000);
-            this.resetForm();
-            this.resetFormIn();
-            this.$emit('refresh');
-            this.dialog = false;
-            this.insumosSelect = [];
-            break;
-
-          case 0:
-            this.alert('Precausión!','Se guardo con éxito pero ocurrio un error al guardar sus insumos','warning', 3000);
-            this.resetForm();
-            this.resetFormIn();
             this.$emit('refresh');
             this.dialog = false;
             this.insumosSelect = [];
@@ -259,70 +251,8 @@ export default {
         this.alert('Error!','Revise su conexión o comuniquese a soporte','error', 2000);
       }
       this.buttonSave = false;
-    },
-    resetForm(){
-      this.form = JSON.parse(JSON.stringify(this.formDefault));
-    },
-
-
-
-
-
-
-
-
-
-
-
-
-    openDialogEdit(item){
-      this.id_producto = item.id_producto;
-      this.nombrePEdit = item.nombreProducto;
-      this.dialogEdit = true;
-
-    },
-    validEdit(){
-      if(this.nombrePEdit != ''){
-        this.editProducto();
-      }else{
-        this.alert('Ingrese un nombre!',' ','warning', 3000);
-      }
-    },
-    async editProducto() {
-      this.buttonSaveEdit = true;
-      const path = `${this.BASE_URL}productos/editProducto/`;
-      let data = new FormData();
-      data.append("id_producto", this.id_producto);
-      data.append("nombrePEdit", this.nombrePEdit);
-      try {
-        let res = await axios.post(path, data, this.AuthToken);
-        console.log(res.data);
-        let dat = res.data;
-        switch (dat.status) {
-          case 'existing':
-            this.alert('¡Ya existe!',' ','warning', 2000);
-            break;
-
-          case 'OK':
-            this.alert('¡Guardado!',' ','success', 2000);
-            this.nombrePEdit = '';
-            this.dialogEdit = false;
-            this.getProductos();
-            break;
-
-          case 'error':
-            this.alert('¡Error!','Intentelo de nuevo o comuníquese con soporte','error', 2000);
-            break;
-        
-          default:
-            break;
-        }
-      } catch (error) {
-        console.log(error)
-        this.alert('Error!','Revise su conexión o comuniquese a soporte','error', 2000);
-      }
-      this.buttonSaveEdit = false;
-    },
+    },   
+    //Modal insumos a elegir
     async getInsumos() {
       this.loadingIn = true;
       this.insumos = [];

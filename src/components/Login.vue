@@ -95,10 +95,9 @@ export default {
         try {
             let res = await axios.post(path, datos);
             this.valid = true;
-            //console.log(res.data);
+            console.log(res.data);
             var data = res.data;
             if (data.res == 'OK') {
-              console.log(data.user)
               if (data.user.token != "") {
               localStorage.setItem("Usuario-pdv", JSON.stringify(data.user));
               swal({
@@ -130,7 +129,6 @@ export default {
             this.valid = true;
             }
         } catch (error) {
-          console.log(error)
             swal({
             title: "¡Error!",
             text: "Revise su conexión o comuniquese a soporte",

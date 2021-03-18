@@ -31,6 +31,7 @@
                     color="success"
                     dark
                     @click="valid"
+                    :disabled="buttonSave"
                   >
                     Guardar
                   </v-btn>
@@ -209,13 +210,7 @@ export default {
       destino: null,
       insumos: []
     },
-    loadingSelect: false,
     buttonSave: false,
-    //dialog edit
-    dialogEdit: false,
-    nombrePEdit: '',
-    buttonSaveEdit: false,
-    id_producto: 0,
     //Insumos
     headersIn: [
       { text: "ID", value: "id_insumo" },
@@ -223,10 +218,7 @@ export default {
       { text: "Unidad", value: "nombreUnidad" },
       { text: "Medida", value: "nombreMedida" },
       { text: "Categoria", value: "nombreCategoriaIn" },
-      { text: "Acción", value: "action" },
-      // { text: "Stock Min x unidad", value: "stockMinUnidad" },
-      // { text: "Stock Min x Medida", value: "stockMinMedida" },
-      // { text: "Stock Inventario", value: "stockInventario" }
+      { text: "Acción", value: "action" }
     ],
     insumos: [],
     search: "",
@@ -247,7 +239,6 @@ export default {
       medida: ""
     },
     headersInSel: [
-      //{ text: "ID", value: "id_insumo" },
       { text: "Nombre", value: "nombreInsumo" },
       { text: "Cantidad", value: "cantidad" },
       { text: "Unidad", value: "nombreUnidad" },
@@ -256,7 +247,6 @@ export default {
     insumosSelect: []
   }),
   created(){
-    //this.getProductos();
     this.getInsumos();
   },
   computed: {
@@ -273,10 +263,10 @@ export default {
       if(this.form.nombreP != '' && this.form.categoria != null && this.form.tipo != null && parseInt(this.form.precio) > 0 && this.form.destino != null){
         if(this.form.tipo == 2){
           this.form.insumos = this.insumosSelect;
+          //this.newproducto(); //sin insumos
+          this.insumosSelect.length > 0 ? this.newproducto() : this.alert('No se han elegido insumos',' ','warning', 3000); // con insumos
+        }else{//producto tipo unidad
           this.newproducto();
-          //this.insumosSelect.length > 0 ? this.newproducto() : this.alert('No se han elegido insumos',' ','warning', 3000);;
-        }else{
-          
         }
         
       }else{
@@ -333,65 +323,6 @@ export default {
       this.form = JSON.parse(JSON.stringify(this.formDefault));
     },
 
-
-
-
-
-
-
-
-
-
-
-
-    openDialogEdit(item){
-      this.id_producto = item.id_producto;
-      this.nombrePEdit = item.nombreProducto;
-      this.dialogEdit = true;
-
-    },
-    validEdit(){
-      if(this.nombrePEdit != ''){
-        this.editProducto();
-      }else{
-        this.alert('Ingrese un nombre!',' ','warning', 3000);
-      }
-    },
-    async editProducto() {
-      this.buttonSaveEdit = true;
-      const path = `${this.BASE_URL}productos/editProducto/`;
-      let data = new FormData();
-      data.append("id_producto", this.id_producto);
-      data.append("nombrePEdit", this.nombrePEdit);
-      try {
-        let res = await axios.post(path, data, this.AuthToken);
-        console.log(res.data);
-        let dat = res.data;
-        switch (dat.status) {
-          case 'existing':
-            this.alert('¡Ya existe!',' ','warning', 2000);
-            break;
-
-          case 'OK':
-            this.alert('¡Guardado!',' ','success', 2000);
-            this.nombrePEdit = '';
-            this.dialogEdit = false;
-            this.getProductos();
-            break;
-
-          case 'error':
-            this.alert('¡Error!','Intentelo de nuevo o comuníquese con soporte','error', 2000);
-            break;
-        
-          default:
-            break;
-        }
-      } catch (error) {
-        console.log(error)
-        this.alert('Error!','Revise su conexión o comuniquese a soporte','error', 2000);
-      }
-      this.buttonSaveEdit = false;
-    },
     async getInsumos() {
       this.loadingIn = true;
       this.insumos = [];
@@ -437,9 +368,6 @@ export default {
       var index = this.insumosSelect.findIndex(insumo => insumo.id_insumo == item.id_insumo);
       console.log(index)
       this.insumosSelect.splice(index, 1);
-    },
-    details(formProducto){
-      this.$refs.detailsModal.showModal(formProducto);
     },
     alert(title, text, icon, timer){
       swal({
