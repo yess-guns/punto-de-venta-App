@@ -5,11 +5,12 @@
       <v-card-title>
         Pedir
         <v-spacer></v-spacer>
+        Pedido
       </v-card-title>
 
       <v-row>
         <!-- formulario -->
-        <v-col cols="12" sm="6" md="6">
+        <v-col cols="12" md="6">
           <v-row>
             <v-col cols="12" sm="6" md="6">
               <v-autocomplete
@@ -51,6 +52,7 @@
               <v-btn
                 color="primary"
                 @click="addProducto"
+                :disabled="!validForm"
               >
                 Agregar
               </v-btn>
@@ -58,11 +60,29 @@
           </v-row>
         </v-col>
         <!-- Elegido -->
-        <v-col cols="12" sm="6" md="6">
-          <template v-for="(comanda, index) in comandas">
+        <v-col cols="12" md="6">
+          <template v-for="(pedido, index) in pedidoCocina">
             <v-row :key="index">
+              <v-col cols="12" md="1">
+                {{pedido.comensal}}
+              </v-col>
+              <v-col cols="12" md="7">
+                {{pedido.nombreProducto}}
+              </v-col>
+              <v-col cols="12" md="2">
+                ${{pedido.precio}}
+              </v-col>
+              <v-col cols="12" md="2">
+                <v-btn icon>
+                  <v-icon>mdi-delete</v-icon>
+                </v-btn>
+              </v-col>
+            </v-row>
+          </template>
+          <template v-for="(pedido, index) in pedidoBar">
+            <v-row :key="'bar'+index">
               <v-col>
-                {{comanda}}
+                {{pedido}}
               </v-col>
             </v-row>
           </template>
@@ -90,10 +110,16 @@ export default {
 
     nameCate: '',
     dataProd: {},
-    comandas: []
+    pedidoCocina: [],
+    pedidoBar: []
   }),
   computed: {
-    ...mapState(["BASE_URL","AuthToken"])
+    ...mapState(["BASE_URL","AuthToken"]),
+    validForm(){
+      if((this.producSelect != null && this.producSelect != '') && this.comensal > 0){
+        return true;
+      }else return false;
+    }
   },
   methods: {
     async getCateProductos() {
@@ -127,9 +153,19 @@ export default {
       this.dataProd = this.productos[index];
     },
     addProducto(){
-      //var product = this.dataProd;
-      this.dataProd.comenzal = this.comensal;
-      this.comandas.push(this.dataProd)
+      this.dataProd.comensal = this.comensal;
+      if(this.dataProd.nombreDestino == "Cocina"){
+        this.pedidoCocina.push(this.dataProd);
+      }else if(this.dataProd.nombreDestino == "Bar"){
+        this.pedidoBar.push(this.dataProd);
+      }
+      
+      this.resetForm();
+    },
+    resetForm(){
+      this.producSelect = '';
+      this.comensal = '';
+      this.dataProd = {};
     },
     restrigirChars(event) {//admite solo numeros
       if (
