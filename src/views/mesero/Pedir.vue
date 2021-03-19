@@ -1,90 +1,149 @@
 <template>
 
   <v-card>
-    <v-container>
-      <v-card-title>
-        Pedir
-        <v-spacer></v-spacer>
-        Pedido
-      </v-card-title>
-
-      <v-row>
-        <!-- formulario -->
-        <v-col cols="12" md="6">
-          <v-row>
-            <v-col cols="12" sm="6" md="6">
-              <v-autocomplete
-                v-model="cateSelec"
-                :items="cateProduc"
-                item-value="id_categoriaPro"
-                item-text="nombrecategoriaPro"
-                deletable-chips
-                label="Categorias"
-                :loading="loading"
-                color="indigo"
-                @change="selectCategoria"
-              >                   
-              </v-autocomplete>
-            </v-col>
-            <v-col cols="12" sm="6" md="6">
-              <v-autocomplete
-                v-model="producSelect"
-                :items="productos"
-                item-value="id_producto"
-                item-text="nombreProducto"
-                deletable-chips
-                label="Productos"
-                :loading="loading"
-                color="indigo"
-                :disabled="producSelect == null ? true : false"
-                @change="selectProducto"
-              >                   
-              </v-autocomplete>
-            </v-col>
-            <v-col cols="12" sm="6" md="6">
-              <v-text-field
-                label="Comensal"
-                v-model="comensal"
-                @keypress="restrigirChars($event)"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" sm="6" md="6">
-              <v-btn
-                color="primary"
-                @click="addProducto"
-                :disabled="!validForm"
-              >
-                Agregar
-              </v-btn>
-            </v-col>
-          </v-row>
+    <v-container fluid>
+      <v-row class="mx-5">
+        <v-col cols="12" class="text-center">
+          <h2>Nuevo pedido</h2>
         </v-col>
-        <!-- Elegido -->
-        <v-col cols="12" md="6">
-          <template v-for="(pedido, index) in pedidoCocina">
-            <v-row :key="index">
-              <v-col cols="12" md="1">
-                {{pedido.comensal}}
-              </v-col>
-              <v-col cols="12" md="7">
-                {{pedido.nombreProducto}}
-              </v-col>
-              <v-col cols="12" md="2">
-                ${{pedido.precio}}
-              </v-col>
-              <v-col cols="12" md="2">
-                <v-btn icon>
-                  <v-icon>mdi-delete</v-icon>
-                </v-btn>
+        <v-col sm="6" md="3">
+          <v-autocomplete
+            v-model="cateSelec"
+            :items="cateProduc"
+            item-value="id_categoriaPro"
+            item-text="nombrecategoriaPro"
+            deletable-chips
+            label="Categorias"
+            :loading="loading"
+            color="indigo"
+            @change="selectCategoria"
+          >                   
+          </v-autocomplete>
+        </v-col>
+        <v-col  sm="6" md="3">
+          <v-autocomplete
+            v-model="producSelect"
+            :items="productos"
+            item-value="id_producto"
+            item-text="nombreProducto"
+            deletable-chips
+            label="Productos"
+            :loading="loading"
+            color="indigo"
+            :disabled="producSelect == null ? true : false"
+            @change="selectProducto"
+          >                   
+          </v-autocomplete>
+        </v-col>
+        <v-col  sm="6" md="3">
+          <v-text-field
+            label="Comensal"
+            v-model="comensal"
+            @keypress="restrigirChars($event)"
+          ></v-text-field>
+        </v-col>
+        <v-col cols="12" sm="6" md="3">
+          <v-btn
+            color="primary"
+            @click="addProducto"
+            :disabled="!validForm"
+          >
+            Agregar
+          </v-btn>
+        </v-col>
+      </v-row>
+      <!--Productos elegidos-->
+      <v-row class="ml-2">
+        <!-- Pedido Cocina -->
+        <v-col cols="12" md="6" v-if="pedidoCocina.length > 0">
+          <template>
+            <v-row>
+              <v-col cols="12" class="text-center text-decoration-underline" >
+                <h3 class="blue--text">
+                  Cocina
+                  <v-btn color="error" icon><v-icon>mdi-printer</v-icon></v-btn>
+                  <v-btn color="success" icon><v-icon>mdi-content-save</v-icon></v-btn>
+                </h3>
               </v-col>
             </v-row>
+            <v-row class="blue-grey lighten-3 mr-1">
+              <v-col cols="3">
+                Comenzal
+              </v-col>
+              <v-col cols="5">
+                Producto
+              </v-col>
+              <v-col cols="2">
+                Precio
+              </v-col>
+              <v-col cols="2">
+                
+              </v-col>
+            </v-row>
+            <template v-for="(pedido, index) in pedidoCocina">
+              <v-row :key="index">
+                <v-col md="3">
+                  {{pedido.comensal}}
+                </v-col>
+                <v-col md="5">
+                  {{pedido.nombreProducto}}
+                </v-col>
+                <v-col md="2">
+                  ${{pedido.precio}}
+                </v-col>
+                <v-col md="2">
+                  <v-btn icon @click="deleteProdCocina(index)">
+                    <v-icon>mdi-delete</v-icon>
+                  </v-btn>
+                </v-col>
+              </v-row>
+            </template>
           </template>
-          <template v-for="(pedido, index) in pedidoBar">
-            <v-row :key="'bar'+index">
-              <v-col>
-                {{pedido}}
+        </v-col>
+        <!-- Pedido Bar -->
+        <v-col cols="12" md="6" v-if="pedidoBar.length > 0">
+          <template>
+            <v-row>
+              <v-col cols="12" class="text-center text-decoration-underline" >
+                <h3 class="blue--text">
+                  Bar
+                  <v-btn color="error" icon><v-icon>mdi-printer</v-icon></v-btn>
+                  <v-btn color="success" icon><v-icon>mdi-content-save</v-icon></v-btn>
+                </h3>
               </v-col>
             </v-row>
+            <v-row class="blue-grey lighten-3 mr-1">
+              <v-col cols="3">
+                Comenzal
+              </v-col>
+              <v-col cols="5">
+                Producto
+              </v-col>
+              <v-col cols="2">
+                Precio
+              </v-col>
+              <v-col cols="2">
+                
+              </v-col>
+            </v-row>
+            <template v-for="(pedido, index) in pedidoBar">
+              <v-row :key="index">
+                <v-col md="3">
+                  {{pedido.comensal}}
+                </v-col>
+                <v-col md="5">
+                  {{pedido.nombreProducto}}
+                </v-col>
+                <v-col md="2">
+                  ${{pedido.precio}}
+                </v-col>
+                <v-col md="2">
+                  <v-btn icon @click="deleteProdBar(index)">
+                    <v-icon>mdi-delete</v-icon>
+                  </v-btn>
+                </v-col>
+              </v-row>
+            </template>
           </template>
         </v-col>
       </v-row>
@@ -150,7 +209,7 @@ export default {
     },
     selectProducto(){
       var index = this.productos.findIndex(produc => produc.id_producto == this.producSelect);
-      this.dataProd = this.productos[index];
+      this.dataProd = JSON.parse(JSON.stringify(this.productos[index]));
     },
     addProducto(){
       this.dataProd.comensal = this.comensal;
@@ -161,6 +220,12 @@ export default {
       }
       
       this.resetForm();
+    },
+    deleteProdCocina(index){
+      this.pedidoCocina.splice(index, 1);
+    },
+    deleteProdBar(index){
+      this.pedidoBar.splice(index, 1);
     },
     resetForm(){
       this.producSelect = '';
