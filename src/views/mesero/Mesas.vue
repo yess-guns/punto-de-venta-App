@@ -3,7 +3,8 @@
   <v-card>
     <v-container>
       <v-card-title>
-        Mesas - Ventas <NewVenta />
+        Mesas - Ventas 
+        <NewVenta @refresh="getMesasVenta" @venta="showVenta"  />
         <v-spacer></v-spacer>
       </v-card-title>
       <v-card :loading="loading">
@@ -24,7 +25,7 @@
           sm="3"
           md="3"
           :key="i"
-          @click="mesa.id_venta == 0 ? '' : validClave(mesa)"
+          @click="mesa.id_venta == 0 ? '' : validClave(mesa.id_venta)"
         >
           <v-card
             class="mx-auto"
@@ -44,18 +45,21 @@
         </v-col>
       </v-row>
     </v-container>
+    <Venta ref="ventaM" />
   </v-card> 
 </template>
 
 <script>
 
 import NewVenta from './NewVenta';
+import Venta from './Venta';
 import { mapState } from 'vuex';
 import axios from "axios";
 export default {
   name: "Mesas",
   components: {
-    NewVenta
+    NewVenta,
+    Venta
   },
   data: () => ({
     mesas: [],
@@ -85,7 +89,7 @@ export default {
         this.loading = false;
       }
     },
-    async validClave(mesa){
+    async validClave(id_venta){
       var clave = 0;
       await swal({
         title: "¡Acceso!",
@@ -110,12 +114,13 @@ export default {
           let valid = res.data;
           if (valid.status == 'OK') {//clave valida
             swal.close();
-            this.actionMesa(valid.res, mesa);
+            this.showVenta(valid.res, id_venta);
+            //this.actionMesa(valid.res, mesa);
           } else {
             swal({title: "Clave invalida", text: ' ', icon: 'error', button: false});
             //swal.stopLoading();
             setTimeout(() => {
-              this.validClave(mesa);
+              this.validClave(id_venta);
             }, 1500)
           }
         } catch (error) {
@@ -136,6 +141,9 @@ export default {
     },
     colorMesa(id_venta){
       return id_venta == 0 ? '#90A4AE' : 'success';
+    },
+    showVenta(mesero, id_venta){
+      this.$refs.ventaM.showDialog(mesero, id_venta);
     },
     alert(title, text, icon, timer){
       swal({

@@ -40,6 +40,7 @@
                   <v-text-field
                     label="Comensales"
                     v-model="comensales"
+                    @keypress="restrigirChars($event)"
                   ></v-text-field>
                 </v-col>
               </v-row>
@@ -52,7 +53,7 @@
               Cancelar
             </v-btn>
             <v-btn
-              :disabled="buttonSave"
+              :loading="buttonSave"
               color="blue darken-1"
               text
               @click="valid"
@@ -155,9 +156,6 @@ export default {
         this.loadingMesas = false;
       }
     },
-    close(){
-      this.empleado = {};
-    },
     valid(){
       if(this.mesaSelect.length > 0 && parseInt(this.comensales)){
         this.newVenta();
@@ -166,7 +164,9 @@ export default {
       }
     },
     async newVenta(){
+      var empleado = this.empleado;
       try {
+        this.buttonSave = true;
         const path = `${this.BASE_URL}ventas/newVenta/`;
         let data = new FormData();
         data.append("id_empleado", this.empleado.id_empleado);
@@ -175,15 +175,36 @@ export default {
         let res = await axios.post(path, data, this.AuthToken);
         console.log(res.data);
         if (res.data == 'OK') {//clave valida
-          this.dialog = false;
+          this.close();
+          this.$emit('refresh');
+          this.$emit('venta', empleado);
+          this.buttonSave = false;
         } else {
           this.alert('Error!','Intentalo de nuevo o comuniquese a soporte','error', 2000);
-          
+          this.buttonSave = false;
         }
       } catch (error) {
         console.log(error)
         this.alert('Error!','Revise su conexión o comuniquese a soporte','error', 2000);
         swal.stopLoading();
+        this.buttonSave = false;
+      }
+    },    
+    close(){
+      this.empleado = {};
+      this.mesas = [];
+      this.mesaSelect = [];
+      this.comensales = '';
+      this.dialog = false;
+    },
+    restrigirChars(event) {//admite solo numeros
+      if (
+        event.charCode === 0 ||
+        /\d/.test(String.fromCharCode(event.charCode))
+      ) {
+        return true;
+      } else {
+        event.preventDefault();
       }
     },
     alert(title, text, icon, timer){
