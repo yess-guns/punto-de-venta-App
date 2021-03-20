@@ -19,10 +19,7 @@
             <v-icon>mdi-close</v-icon>
           </v-btn>
           <v-toolbar-title>
-            Mesa(s): 
-            <template v-for="mesa in mesas">
-              {{mesa.numero}},
-            </template>
+            Mesa(s): {{ mesas }}
              ||  
             {{ `${empleado.nombreEmpleado} ${empleado.apellidosEmpleado}` }}
           </v-toolbar-title>
@@ -60,7 +57,7 @@
         <v-tabs-items v-model="tab">
           <v-tab-item value="pedir">
             <v-card>
-              <Pedir />
+              <Pedir :mesas="mesas" />
             </v-card>
           </v-tab-item>
           <v-tab-item value="pedido">
@@ -88,7 +85,7 @@ export default {
     dialog: false,
     loading: false,
     empleado: {},
-    mesas: [],
+    mesas: '',
     tab: null,
   }),
   computed: {
@@ -103,14 +100,20 @@ export default {
     },
     async dataVenta(id_venta){
       this.loading = true;
-      this.mesas = [];
+      this.mesas = '';
       const path = `${this.BASE_URL}ventas/ventaById/${id_venta}`;
       try {
         let res = await axios.get(path, this.AuthToken);
         console.log(res.data);
         let data = res.data;
         if (res.data.status == 'OK') {
-          this.mesas = res.data.mesas;
+          var mesas = res.data.mesas;
+          let coma = 0;
+          mesas.forEach((mesa, i) =>{
+            coma = ((i + 1) == mesas.length) ? '' : ', ';
+            this.mesas += `${mesa.numero}${coma}`;
+          });
+          console.log(this.mesas)
           //this.mesas = data.res;
           this.loading = false;
         } else {
@@ -124,7 +127,7 @@ export default {
     },
     closeDialog(){
       this.empleado = {};
-      this.mesas = [];
+      this.mesas = '';
       this.dialog = false;
     }
   },

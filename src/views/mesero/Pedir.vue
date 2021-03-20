@@ -61,7 +61,7 @@
               <v-col cols="12" class="text-center text-decoration-underline" >
                 <h3 class="blue--text">
                   Cocina
-                  <v-btn color="error" icon><v-icon>mdi-printer</v-icon></v-btn>
+                  <v-btn color="error" icon @click="printOrden(pedidoCocina)"><v-icon>mdi-printer</v-icon></v-btn>
                   <v-btn color="success" icon><v-icon>mdi-content-save</v-icon></v-btn>
                 </h3>
               </v-col>
@@ -107,7 +107,7 @@
               <v-col cols="12" class="text-center text-decoration-underline" >
                 <h3 class="blue--text">
                   Bar
-                  <v-btn color="error" icon><v-icon>mdi-printer</v-icon></v-btn>
+                  <v-btn color="error" icon @click="printOrden(pedidoBar)"><v-icon>mdi-printer</v-icon></v-btn>
                   <v-btn color="success" icon><v-icon>mdi-content-save</v-icon></v-btn>
                 </h3>
               </v-col>
@@ -154,10 +154,14 @@
 <script>
 import { mapState } from 'vuex';
 import axios from "axios";
+import print from 'print-js';
 export default {
   name: "Pedir",
   components: {
   },
+  props: [
+    "mesas"
+  ],
   data: () => ({
     cateProduc: [],
     productos: [],
@@ -213,6 +217,7 @@ export default {
     },
     addProducto(){
       this.dataProd.comensal = this.comensal;
+      this.dataProd.comensalHtml = `<p class="text-center">${this.comensal}</p>`;
       if(this.dataProd.nombreDestino == "Cocina"){
         this.pedidoCocina.push(this.dataProd);
       }else if(this.dataProd.nombreDestino == "Bar"){
@@ -226,6 +231,22 @@ export default {
     },
     deleteProdBar(index){
       this.pedidoBar.splice(index, 1);
+    },
+    printOrden(productos){
+      print(
+        {
+          header: '<h3 class="custom-h3">Pedido - Mesa: '+this.mesas+' </h3>',
+          printable: productos,
+          properties: [
+            { field: 'comensalHtml', displayName: 'Comenzal' },
+            { field: 'nombreProducto', displayName: 'Producto'}
+          ],
+          type: 'json',
+          gridHeaderStyle: 'border-bottom: 2px solid #3971A5;',
+          gridStyle: 'border: 2px solid #fff;',
+          style: '.text-center { text-align: center; }'
+        }
+      )
     },
     resetForm(){
       this.producSelect = '';
