@@ -61,8 +61,22 @@
               <v-col cols="12" class="text-center text-decoration-underline" >
                 <h3 class="blue--text">
                   Cocina
-                  <v-btn color="error" icon @click="printOrden(pedidoCocina)"><v-icon>mdi-printer</v-icon></v-btn>
-                  <v-btn color="success" icon><v-icon>mdi-content-save</v-icon></v-btn>
+                  <v-btn
+                    color="error"
+                    icon
+                    @click="printOrden(pedidoCocina), btnCocina = false"
+                  >
+                    <v-icon>mdi-printer</v-icon>
+                  </v-btn>
+                  <v-btn
+                    color="success"
+                    icon
+                    :loading="btnSave"
+                    :disabled="btnCocina"
+                    @click="savePedido(pedidoCocina, 'Cocina')"
+                  >
+                    <v-icon>mdi-content-save</v-icon>
+                  </v-btn>
                 </h3>
               </v-col>
             </v-row>
@@ -107,8 +121,22 @@
               <v-col cols="12" class="text-center text-decoration-underline" >
                 <h3 class="blue--text">
                   Bar
-                  <v-btn color="error" icon @click="printOrden(pedidoBar)"><v-icon>mdi-printer</v-icon></v-btn>
-                  <v-btn color="success" icon><v-icon>mdi-content-save</v-icon></v-btn>
+                  <v-btn
+                    color="error"
+                    icon
+                    @click="printOrden(pedidoBar), btnBar = false"
+                  >
+                    <v-icon>mdi-printer</v-icon>
+                  </v-btn>
+                  <v-btn
+                    color="success"
+                    icon
+                    :loading="btnSave"
+                    :disabled="btnBar"
+                    @click="savePedido(pedidoBar, 'Bar')"
+                  >
+                    <v-icon>mdi-content-save</v-icon>
+                  </v-btn>
                 </h3>
               </v-col>
             </v-row>
@@ -160,7 +188,9 @@ export default {
   components: {
   },
   props: [
-    "mesas"
+    "mesas",
+    "idVenta",
+    "idEmpleado"
   ],
   data: () => ({
     cateProduc: [],
@@ -174,7 +204,11 @@ export default {
     nameCate: '',
     dataProd: {},
     pedidoCocina: [],
-    pedidoBar: []
+    pedidoBar: [],
+
+    btnCocina: true,
+    btnBar: true,
+    btnSave: false
   }),
   computed: {
     ...mapState(["BASE_URL","AuthToken"]),
@@ -193,7 +227,7 @@ export default {
         let res = await axios.get(path, this.AuthToken);
         console.log(res.data);
         let data = res.data;
-        if (res.data.status == 'OK') {
+        if (data.status == 'OK') {
           this.cateProduc = data.cateProd;
           this.loading = false;
         } else {
@@ -201,7 +235,7 @@ export default {
         }
       } catch (error) {
         console.log(error)
-        this.alert('Error!','Revise su conexión o comuniquese a soporte','error', 2000);
+        this.alert('Error!','Revise su conexión o comuníquese a soporte','error', 2000);
         this.loading = false;
       }
     },
@@ -248,10 +282,49 @@ export default {
         }
       )
     },
+    async savePedido(pedido, destino) {
+      this.btnSave = true;
+      try {
+        const path = `${this.BASE_URL}ventas/savePedido/`;
+        let dataPost = new FormData();
+        dataPost.append("idVenta", this.idVenta);
+        dataPost.append("idEmpleado", this.idEmpleado);
+        dataPost.append("pedido", JSON.stringify(pedido));
+        let res = await axios.post(path, dataPost, this.AuthToken);
+        console.log(res.data);
+        if (res.data == 'OK') {
+          if(destino == 'Cocina'){
+            this.alert('Guardado!',' ','success', 1500);
+            this.pedidoCocina = [];
+            this.btnCocina = true;
+          }else if(destino == 'Bar'){
+            this.pedidoBar = [];
+            this.btnBar = true;
+          }
+          this.cateSelec = '';
+        } else {
+          this.alert('Error!','Intentalo de nuevo comuníquese a soporte','error', 2000);
+        }
+        this.btnSave = false;
+      } catch (error) {
+        console.log(error)
+        this.alert('Error!','Revise su conexión o comuníquese a soporte','error', 2000);
+        this.btnSave = false;
+      }
+    },
     resetForm(){
       this.producSelect = '';
       this.comensal = '';
       this.dataProd = {};
+    },
+    resetPedido(){
+      this.pedidoCocina = [];
+      this.pedidoBar = [];
+    },
+    resetAll(){
+      this.resetForm();
+      this.resetPedido();
+      this.cateSelec = '';
     },
     restrigirChars(event) {//admite solo numeros
       if (

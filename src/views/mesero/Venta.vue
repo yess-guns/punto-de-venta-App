@@ -5,6 +5,7 @@
       fullscreen
       hide-overlay
       transition="dialog-bottom-transition"
+      persistent
     >
       <v-card>
         <v-toolbar
@@ -50,19 +51,19 @@
           <v-tab href="#pedir">
             Pedir
           </v-tab>
-          <v-tab href="#pedido">
-            Pedido
+          <v-tab href="#venta" @click="actuVenta">
+            Venta
           </v-tab>
         </v-tabs>
         <v-tabs-items v-model="tab">
           <v-tab-item value="pedir">
             <v-card>
-              <Pedir :mesas="mesas" />
+              <Pedir :mesas="mesas" ref="pedir" :idVenta="id_venta" :idEmpleado="empleado.id_empleado" />
             </v-card>
           </v-tab-item>
-          <v-tab-item value="pedido">
+          <v-tab-item value="venta">
             <v-card>
-              Pedido
+              <DatosVentaM :idVenta="id_venta" ref="datosVenta" />
             </v-card>
           </v-tab-item>
         </v-tabs-items>
@@ -73,13 +74,15 @@
 </template>
 
 <script>
-import Pedir from './Pedir'
+import Pedir from './Pedir';
+import DatosVentaM from './DatosVentaM';
 import { mapState } from 'vuex';
 import axios from "axios";
 export default {
   name: "Venta",
   components: {
-    Pedir
+    Pedir,
+    DatosVentaM
   },
   data: () => ({
     dialog: false,
@@ -87,16 +90,20 @@ export default {
     empleado: {},
     mesas: '',
     tab: null,
+    id_venta: 0
   }),
   computed: {
     ...mapState(["BASE_URL","AuthToken"])
   },
   methods: {
     showDialog(empleado, id_venta){
+      this.id_venta = id_venta;
+      this.tab = null;
       this.empleado = {};
       this.empleado = empleado;
       this.dialog = true;
       this.dataVenta(id_venta);
+      //this.$refs.datosVenta.getDatosVenta();
     },
     async dataVenta(id_venta){
       this.loading = true;
@@ -108,10 +115,10 @@ export default {
         let data = res.data;
         if (res.data.status == 'OK') {
           var mesas = res.data.mesas;
-          let coma = 0;
+          let signoComa = 0;
           mesas.forEach((mesa, i) =>{
-            coma = ((i + 1) == mesas.length) ? '' : ', ';
-            this.mesas += `${mesa.numero}${coma}`;
+            signoComa = ((i + 1) == mesas.length) ? '' : ', ';
+            this.mesas += `${mesa.numero}${signoComa}`;
           });
           console.log(this.mesas)
           //this.mesas = data.res;
@@ -125,10 +132,17 @@ export default {
         this.loading = false;
       }
     },
+    actuVenta(){
+      setTimeout(()=>{
+        this.$refs.datosVenta.getDatosVenta(this.id_venta);
+      },1)
+      
+    },
     closeDialog(){
       this.empleado = {};
       this.mesas = '';
       this.dialog = false;
+      this.$refs.pedir.resetAll();
     }
   },
 

@@ -174,10 +174,10 @@ export default {
         data.append("comensales", this.comensales);
         let res = await axios.post(path, data, this.AuthToken);
         console.log(res.data);
-        if (res.data == 'OK') {//clave valida
+        if (res.data.resp == 'OK') {//clave valida
           this.close();
           this.$emit('refresh');
-          this.$emit('venta', empleado);
+          this.$emit('venta', empleado, res.data.idVenta);
           this.buttonSave = false;
         } else {
           this.alert('Error!','Intentalo de nuevo o comuniquese a soporte','error', 2000);
