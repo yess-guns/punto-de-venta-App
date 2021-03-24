@@ -19,7 +19,6 @@
     <v-data-table
       :headers="headers"
       :items="insumos"
-      :items-per-page="5"
       class="elevation-1"
       :loading="loading"
     >
@@ -100,6 +99,12 @@
                   disabled
                 ></v-text-field>
               </v-col>
+              <v-col cols="12" sm="12" md="6">
+                <v-text-field
+                  v-model="form.precio"
+                  label="Precio"
+                ></v-text-field>
+              </v-col>
             </v-row>
           </v-container>
         </v-card-text>
@@ -177,6 +182,7 @@ export default {
       { text: "Medida", value: "nombreMedida" },
       { text: "Categoria", value: "nombreCategoriaIn" },
       { text: "Cantidad X medida", value: "catXmedida" },
+      { text: "Precio", value: "precioIn" },
       // { text: "Stock Min x unidad", value: "stockMinUnidad" },
       // { text: "Stock Min x Medida", value: "stockMinMedida" },
       // { text: "Stock Inventario", value: "stockInventario" }
@@ -194,6 +200,7 @@ export default {
       cantidadM: '',
       stockMinU: '',
       stockMinM: '',
+      precio: ''
     },
     formDefault:{
       nombreI: '',
@@ -203,6 +210,7 @@ export default {
       cantidadM: '',
       stockMinU: '',
       stockMinM: '',
+      precio: ''
     },
     loadingSelect: false,
     buttonSave: false,
@@ -275,7 +283,7 @@ export default {
       }
     },
     valid(){
-      if(this.form.nombreI != '' && this.form.unidad != null && this.form.medida != null && this.form.categoria != null && parseInt(this.form.cantidadM) > 0 && parseInt(this.form.stockMinU) > 0){
+      if(this.form.nombreI != '' && this.form.unidad != null && this.form.medida != null && this.form.categoria != null && parseInt(this.form.cantidadM) > 0 && parseInt(this.form.stockMinU) > 0 && parseInt(this.form.precio) > 0){
         this.newInsumo();
       }else{
         this.alert('Formulario incompleto o error de información',' ','warning', 3000);
