@@ -64,7 +64,7 @@
                   <v-btn
                     color="error"
                     icon
-                    @click="printOrden(pedidoCocina), btnCocina = false"
+                    @click="printOrden(pedidoCocina, comentCocina), btnCocina = false"
                   >
                     <v-icon>mdi-printer</v-icon>
                   </v-btn>
@@ -112,6 +112,36 @@
                 </v-col>
               </v-row>
             </template>
+            <v-divider></v-divider>
+            <v-row class="mt-3">
+              <v-col cols="12">
+                Comentario
+                <v-radio-group
+                  v-model="comentRadioC"
+                  row
+                >
+                  <v-radio
+                    label="Si"
+                    value="si"
+                  ></v-radio>
+                  <v-radio
+                    label="No"
+                    value="no"
+                  ></v-radio>
+                </v-radio-group>
+              </v-col>
+              <v-col cols="12" v-if="comentRadioC == 'si'">
+                <v-textarea
+                  label="Comentario"
+                  auto-grow
+                  outlined
+                  rows="1"
+                  row-height="25"
+                  color="indigo"
+                  v-model="comentCocina"
+                ></v-textarea>
+              </v-col>
+            </v-row>
           </template>
         </v-col>
         <!-- Pedido Bar -->
@@ -124,7 +154,7 @@
                   <v-btn
                     color="error"
                     icon
-                    @click="printOrden(pedidoBar), btnBar = false"
+                    @click="printOrden(pedidoBar, comentBar), btnBar = false"
                   >
                     <v-icon>mdi-printer</v-icon>
                   </v-btn>
@@ -172,6 +202,36 @@
                 </v-col>
               </v-row>
             </template>
+            <v-divider></v-divider>
+            <v-row class="mt-3">
+              <v-col cols="12">
+                Comentario
+                <v-radio-group
+                  v-model="comentRadioB"
+                  row
+                >
+                  <v-radio
+                    label="Si"
+                    value="si"
+                  ></v-radio>
+                  <v-radio
+                    label="No"
+                    value="no"
+                  ></v-radio>
+                </v-radio-group>
+              </v-col>
+              <v-col cols="12" v-if="comentRadioB == 'si'">
+                <v-textarea
+                  label="Comentario"
+                  auto-grow
+                  outlined
+                  rows="1"
+                  row-height="25"
+                  color="indigo"
+                  v-model="comentBar"
+                ></v-textarea>
+              </v-col>
+            </v-row>
           </template>
         </v-col>
       </v-row>
@@ -205,6 +265,10 @@ export default {
     dataProd: {},
     pedidoCocina: [],
     pedidoBar: [],
+    comentCocina: '',
+    comentRadioC: 'no',
+    comentBar: '',
+    comentRadioB: 'no',
 
     btnCocina: true,
     btnBar: true,
@@ -266,10 +330,10 @@ export default {
     deleteProdBar(index){
       this.pedidoBar.splice(index, 1);
     },
-    printOrden(productos){
+    printOrden(productos, comentario){
       print(
         {
-          header: '<h3 class="custom-h3">Pedido - Mesa: '+this.mesas+' </h3>',
+          header: '<h3 class="custom-h3">Pedido - Mesa: '+this.mesas+' </h3> <div id="inferior">*'+comentario+'</div>',
           printable: productos,
           properties: [
             { field: 'comensalHtml', displayName: 'Comenzal' },
@@ -278,7 +342,7 @@ export default {
           type: 'json',
           gridHeaderStyle: 'border-bottom: 2px solid #3971A5;',
           gridStyle: 'border: 2px solid #fff;',
-          style: '.text-center { text-align: center; }'
+          style: '.text-center { text-align: center; } #inferior {position:absolute; left:0px; right:0px; bottom:0px; height:50px; z-index:0;}'
         }
       )
     },
@@ -293,13 +357,17 @@ export default {
         let res = await axios.post(path, dataPost, this.AuthToken);
         console.log(res.data);
         if (res.data == 'OK') {
+          this.alert('Guardado!',' ','success', 1500);
           if(destino == 'Cocina'){
-            this.alert('Guardado!',' ','success', 1500);
             this.pedidoCocina = [];
             this.btnCocina = true;
+            this.comentCocina = '';
+            this.comentRadioC = 'no';
           }else if(destino == 'Bar'){
             this.pedidoBar = [];
             this.btnBar = true;
+            this.comentBar = '';
+            this.comentRadioB = 'no';
           }
           this.cateSelec = '';
         } else {
@@ -320,6 +388,10 @@ export default {
     resetPedido(){
       this.pedidoCocina = [];
       this.pedidoBar = [];
+      this.comentCocina = '';
+      this.comentRadioC = 'no';
+      this.comentBar = '';
+      this.comentRadioB = 'no';
     },
     resetAll(){
       this.resetForm();
