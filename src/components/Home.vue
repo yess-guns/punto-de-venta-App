@@ -2,6 +2,7 @@
   <div>
     <Admin v-if="clave == 111" />
     <Mesero v-if="clave == 444" />
+    <Cajero v-if="clave == 333" />
   </div>
 
 </template>
@@ -10,6 +11,7 @@
 import Navbar from '@/components/Navbar';
 import Admin from '@/components/users/Admin';
 import Mesero from '@/components/users/Mesero';
+import Cajero from '@/components/users/Cajero';
 
 import { mapMutations, mapState } from 'vuex';
 export default {
@@ -17,7 +19,8 @@ export default {
   components: {
     Navbar,
     Admin,
-    Mesero
+    Mesero,
+    Cajero
   },
   data: () => ({
     clave: 0,
