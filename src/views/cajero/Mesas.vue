@@ -105,7 +105,7 @@ export default {
           const path = `${this.BASE_URL}empleados/validEmpleado/`;
           let data = new FormData();
           data.append("clave", clave);
-          data.append("tipoEmpleado", 'Mesero');
+          data.append("tipoEmpleado", 'Cajero');
           let res = await axios.post(path, data, this.AuthToken);
           console.log(res.data);
           let valid = res.data;
