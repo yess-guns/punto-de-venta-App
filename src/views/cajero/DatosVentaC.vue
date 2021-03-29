@@ -5,7 +5,7 @@
         <v-col cols="12">
           <h2>
             Total a Pagar: ${{ precioTotal.toFixed(2) }}
-            <v-tooltip right>
+            <v-tooltip right v-if="precioTotal > 0">
               <template v-slot:activator="{ on, attrs }">
                 <v-btn
                   icon
@@ -22,7 +22,7 @@
             </v-tooltip>
           </h2>
         </v-col>
-        <v-col cols="12">
+        <v-col cols="12" v-if="precioTotal > 0">
               <!-- <v-btn
                 icon
                 color="#E0E0E0"
@@ -45,7 +45,7 @@
                   <v-btn
                     icon
                     color="success"
-                    @click="pago.efectivo.status = !pago.efectivo.status"
+                    @click="btnPagoEfectivo"
                     v-bind="attrs"
                     v-on="on"
                   >
@@ -63,7 +63,7 @@
                   <v-btn
                     icon
                     color="blue"
-                    @click="pago.tarjetaCD.status = !pago.tarjetaCD.status"
+                    @click="btnPagoTarjeta"
                     v-bind="attrs"
                     v-on="on"
                   >
@@ -81,7 +81,7 @@
                   <v-btn
                     icon
                     color="amber"
-                    @click="statusPropina = !statusPropina"
+                    @click="btnPropina"
                     v-bind="attrs"
                     v-on="on"
                   >
@@ -201,7 +201,7 @@
           </v-row>
           <v-divider></v-divider>
           <v-row v-if="pago.efectivo.status || pago.tarjetaCD.status" justify="end">
-            <v-col cols="12" class="my-3 text-right">
+            <v-col cols="3" class="my-3 text-right">
               <v-tooltip right>
                 <template v-slot:activator="{ on, attrs }">
                   <v-btn
@@ -219,6 +219,24 @@
                 <span>Pagar</span>
               </v-tooltip>
             </v-col>
+            <v-col cols="3" class="my-3 text-right">
+              <v-tooltip right>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                    color="success"
+                    @click="validPago"
+                    icon
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    <v-icon color="success" x-large>
+                      mdi-content-save
+                    </v-icon>
+                  </v-btn>
+                </template>
+                <span>Guardar</span>
+              </v-tooltip>
+            </v-col>
           </v-row>
         </v-col>
       </v-row>
@@ -228,7 +246,7 @@
         Venta
         <v-spacer></v-spacer>
       </v-card-title>
-      
+            
       <v-data-table
         :headers="headers"
         :items="ventaDatos"
@@ -248,6 +266,53 @@
       </v-data-table>
 
     </v-card>
+
+    <!-- Ticket-final -->
+    <div v-show="false">
+      <div id="ticketFinal">
+          <div class="text-center2">
+            <div>LOS CANDILES</div>
+            <div>TURISTICA DEL PALMAR S.A. DE C.V.</div>
+            <div>R.F.C.: TPA921103JSA</div>
+          </div>
+          <div>EXPEDIDO EN:</div>
+          <div class="text-center2">TLAXCALA - APIZACO MÉXICO </div>
+          <div>FOLIO NO.: 385</div>
+          <div>Fecha........:06/03/26  Hora.....:17:42</div>
+          <div>Mesa........: 6  RST Personas....:3</div>
+          <table class="tableProd">
+            <thead>
+              <tr class="izquierdo">
+                <th>Cant</th>
+                <th>Producto</th>
+                <th>P. U.</th>
+                <th>Importe</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(item, i) in ventaDatosPrint" :key="i">
+                <td>1</td>
+                <td>
+                  {{ item.nombreProducto.length > 20 ? item.nombreProducto.slice(0, 20) + '...' : item.nombreProducto }}
+                </td>
+                <td class="derecha">
+                  {{ `$ ${parseInt(item.precio).toFixed(2)}` }}
+                </td>
+                <td class="derecha">
+                  {{ `$ ${parseInt(item.precio).toFixed(2)}` }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div>Total Productos: {{ ventaDatosPrint.length }}</div>
+          <div>Sub total Alimentos: $ {{ precioTotal.toFixed(2) }}</div>
+          <h2>Total: ${{ precioTotal.toFixed(2) }}</h2>
+      </div>
+    </div>
+    <v-col cols="8" sm="6" md="3">
+      
+    </v-col>
+    
   </v-row>
 </template>
 
@@ -270,6 +335,7 @@ export default {
       { text: "Precio", value: "precio", align: 'end' }
     ],
     ventaDatos: [],
+    ventaDatosPrint: [],
     loading: false,
     precioTotal: 0,
     //pago
@@ -308,16 +374,14 @@ export default {
         status: false
       }
     },
-    statusPropina: false
+    statusPropina: false,
   }),
   computed: {
     ...mapState(["BASE_URL","AuthToken"])
   },
   methods: {
     async getDatosVenta(idVenta) {
-      this.loading = true;
-      this.ventaDatos = [];
-      this.precioTotal = 0;
+      this.resetAll();
       const path = `${this.BASE_URL}ventas/getDatosVenta/${idVenta}`;
       try {
         let res = await axios.get(path, this.AuthToken);
@@ -325,6 +389,7 @@ export default {
         let data = res.data;
         if (data.status == 'OK') {
           this.ventaDatos = data.res;
+          this.ventaDatosPrint = JSON.parse(JSON.stringify(data.res));
           this.loading = false;
           this.genTotal();
         } else {
@@ -343,6 +408,7 @@ export default {
         this.ventaDatos[i].precioHtml = `<div id="precioID">$ ${parseInt(produc.precio).toFixed(2)}</div>`;
       });
       this.precioTotal = countTotal;
+      
       this.ventaDatos.push(
         {
           'comenzal': 'TOTAL',
@@ -351,7 +417,8 @@ export default {
           'precio': this.precioTotal,
           'precioHtml': `<div id="precioID">$ ${this.precioTotal.toFixed(2)}</div>`
         }
-      )
+      );
+      
     },
     printTicket(){
       print(
@@ -367,7 +434,25 @@ export default {
           gridStyle: 'border: 2px solid #fff;',
           style: '.text-center { text-align: center; } #precioID { text-align: right; }'
         }
-      )
+      );
+    },
+    btnPagoEfectivo(){
+      this.pago.efectivo.status = !this.pago.efectivo.status;
+      this.pago.efectivo.monto = '';
+      this.pago.efectivo.factura = '';
+      this.pago.efectivo.statusFac = false;
+    },
+    btnPagoTarjeta(){
+      this.pago.tarjetaCD.status = !this.pago.tarjetaCD.status;
+      this.pago.tarjetaCD.monto = '';
+      this.pago.tarjetaCD.bouche = '';
+      this.pago.tarjetaCD.factura = '';
+      this.pago.tarjetaCD.statusFac = false;
+    },
+    btnPropina(){
+      this.statusPropina = !this.statusPropina;
+      this.pago.efectivo.propina = '';
+      this.pago.tarjetaCD.propina = '';
     },
     validPago(){
       //validación efectivo
@@ -392,12 +477,47 @@ export default {
       }
 
       if(statusEfectivo && statusTarjetaCD){
-        this.alert('Bien!','Good','success', 1000);
+        this.genTicketFinal();
       }else{
         this.alert('Error!','Debe llenar todos los campos','error', 2000);
       }
       //alert('statusEfectivo: '+statusEfectivo)
       //alert('statusTarjetaCD: '+statusTarjetaCD)
+
+    },
+    genTicketFinal(){
+      print(
+        {
+          // header: this.headerTickEnd,
+          // printable: this.ventaDatos,
+          printable: 'ticketFinal',
+          properties: [
+            { field: 'nombreProducto', displayName: 'Producto'},
+            { field: 'precioHtml', displayName: 'Precio'}
+          ],
+          type: 'html',
+          // type: 'json',
+          gridHeaderStyle: 'border-bottom: 2px solid #3971A5;',
+          gridStyle: 'border: 2px solid #fff;',
+          style: `
+
+            .text-center2 { text-align: center; }
+            .izquierdo { text-align: left; }
+            .derecha { text-align: right; }
+            .tableProd { font-size: 10pt; }
+            
+          `
+        }
+      );
+    },
+    resetAll(){
+      this.loading = true;
+      this.ventaDatos = [];
+      this.ventaDatosPrint = [];
+      this.precioTotal = 0;
+      this.statusPago = false;
+      this.statusPropina = false;
+      this.pago = JSON.parse(JSON.stringify(this.pagoDefaul));
 
     },
     restrigirChars(event) {//admite solo numeros
