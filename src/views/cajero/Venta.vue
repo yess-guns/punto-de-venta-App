@@ -55,7 +55,7 @@
         <v-tabs-items v-model="tab">
           <v-tab-item value="venta">
             <v-card>
-              <DatosVentaC :idVenta="id_venta" ref="datosVenta" />
+              <DatosVentaC :idVenta="id_venta" :mesas="mesas" ref="datosVenta" />
             </v-card>
           </v-tab-item>
         </v-tabs-items>
