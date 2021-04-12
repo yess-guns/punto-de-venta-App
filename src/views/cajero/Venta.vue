@@ -22,7 +22,7 @@
           <v-toolbar-title>
             Mesa(s): {{ mesas }}
              ||  
-            {{ `${empleado.nombreEmpleado} ${empleado.apellidosEmpleado}` }}
+            {{ empleado }}
           </v-toolbar-title>
           <v-spacer></v-spacer>
         </v-toolbar>
@@ -55,7 +55,7 @@
         <v-tabs-items v-model="tab">
           <v-tab-item value="venta">
             <v-card>
-              <DatosVentaC :idVenta="id_venta" :mesas="mesas" ref="datosVenta" />
+              <DatosVentaC :idVenta="id_venta" :mesas="mesas" :comensales="comensales" :usuario="empleado" ref="datosVenta" />
             </v-card>
           </v-tab-item>
         </v-tabs-items>
@@ -77,10 +77,11 @@ export default {
   data: () => ({
     dialog: false,
     loading: false,
-    empleado: {},
+    empleado: '',
     mesas: '',
     tab: null,
-    id_venta: 0
+    id_venta: 0,
+    comensales: 0
   }),
   computed: {
     ...mapState(["BASE_URL","AuthToken"])
@@ -89,8 +90,8 @@ export default {
     showDialog(empleado, id_venta){
       this.id_venta = id_venta;
       this.tab = null;
-      this.empleado = {};
-      this.empleado = empleado;
+      this.empleado = '';
+      this.empleado = `${empleado.nombreEmpleado} ${empleado.apellidosEmpleado}`;
       this.dialog = true;
       this.dataVenta(id_venta);
       setTimeout(()=>{
@@ -107,6 +108,7 @@ export default {
         let data = res.data;
         if (res.data.status == 'OK') {
           var mesas = res.data.mesas;
+          this.comensales = res.data.comensales;
           let signoComa = 0;
           mesas.forEach((mesa, i) =>{
             signoComa = ((i + 1) == mesas.length) ? '' : ', ';

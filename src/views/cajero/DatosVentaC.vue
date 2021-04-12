@@ -1,7 +1,7 @@
 <template>
   <v-row class="mx-5">
     <v-col md="6">
-      <v-row v-if="folioPago == ''">
+      <v-row v-if="pagoPrint == null">
         <v-col cols="12">
           <h2>
             Total a Pagar: ${{ precioTotal.toFixed(2) }}
@@ -282,8 +282,26 @@
         </v-col>
       </v-row>
       <v-row v-else>
-        <v-col cols="12">
-          <h2>Pago realizado por un monto de: $ </h2>
+        <v-col cols="12" class="text-center">
+          <h2>Pago realizado por un monto de: $ {{ pagoPrint.total }}</h2>
+        </v-col>
+        <v-col cols="12" class="text-center">
+          <v-tooltip right>
+            <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  color="success"
+                  fab
+                  dark
+                  large
+                  v-bind="attrs"
+                  v-on="on"
+                  @click="genTicketFinal()"
+                >
+                  <v-icon>mdi-printer</v-icon>
+                </v-btn>
+            </template>
+            <span>Imprimir Ticket</span>
+          </v-tooltip>
         </v-col>
       </v-row>
     </v-col>
@@ -304,10 +322,10 @@
           {{ item.nombreProducto == 'TOTAL' ? '' : item.nombreProducto }}
         </template> -->
         <template v-slot:[`item.precioUni`]="{ item }">
-          {{ item.precioUni == '' ? '' : `$ ${parseInt(item.precioUni).toFixed(2)}` }}
+          {{ item.precioUni == '' ? '' : `$ ${parseFloat(item.precioUni).toFixed(2)}` }}
         </template>
         <template v-slot:[`item.importe`]="{ item }">
-          {{ `$ ${parseInt(item.importe).toFixed(2)}` }}
+          {{ `$ ${parseFloat(item.importe).toFixed(2)}` }}
         </template>
       </v-data-table>
 
@@ -315,44 +333,86 @@
 
     <!-- Ticket-final -->
     <div v-show="false">
-      <div id="ticketFinal">
-          <div class="text-center2">
-            <div>LOS CANDILES</div>
-            <div>TURISTICA DEL PALMAR S.A. DE C.V.</div>
-            <div>R.F.C.: TPA921103JSA</div>
-          </div>
-          <div>EXPEDIDO EN:</div>
-          <div class="text-center2">TLAXCALA - APIZACO MÉXICO </div>
-          <div>FOLIO NO.: 385</div>
-          <div>Fecha........:06/03/26  Hora.....:17:42</div>
-          <div>Mesa........: 6  RST Personas....:3</div>
-          <table class="tableProd">
-            <thead>
-              <tr class="izquierdo">
-                <th>Cant</th>
-                <th>Producto</th>
-                <th>P. U.</th>
-                <th>Importe</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(item, i) in ventaDatosPrint" :key="i">
-                <td>{{ item.cantidad }}</td>
-                <td style="font-size: 5px;">
-                  {{ item.nombreProducto.length > 15 ? item.nombreProducto.slice(0, 15) : item.nombreProducto }}
-                </td>
-                <td class="derecha">
-                  {{ `${parseInt(item.precioUni).toFixed(2)}` }}
-                </td>
-                <td class="derecha">
-                  {{ `${parseInt(item.importe).toFixed(2)}` }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div>Total Productos: {{ ventaDatosPrint.length }}</div>
-          <div>Sub total Alimentos: $ {{ precioTotal.toFixed(2) }}</div>
-          <h2>Total: $ {{ precioTotal.toFixed(2) }}</h2>
+      <div id="ticketFinal" v-if="pagoPrint != null">
+        <div class="text-center2">
+          <div>LOS CANDILES</div>
+          <div>TURISTICA DEL PALMAR S.A. DE C.V.</div>
+          <div>R.F.C.: TPA921103JSA</div><br>
+        </div>
+        <div>EXPEDIDO EN:</div><br>
+        <div class="text-center2">TLAXCALA - APIZACO MÉXICO </div>
+        <div>FOLIO NO.: {{ pagoPrint.folio }}</div>
+        <div>Fecha: {{ formatDate(pagoPrint.fecha) }} ........ Hora: {{ pagoPrint.hora }}</div>
+        <div>Mesa(s): {{ mesas }} ... RST Personas: {{ comensales }}</div><br>
+        <table class="tableProd">
+          <thead>
+            <tr class="izquierdo">
+              <th>Cant</th>
+              <th>Producto</th>
+              <th>P. U.</th>
+              <th>Importe</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(item, i) in ventaDatosPrint" :key="i">
+              <td class="text-center2">{{ item.cantidad }}</td>
+              <td>
+                {{ item.nombreProducto.length > 15 ? item.nombreProducto.slice(0, 15) : item.nombreProducto }}
+              </td>
+              <td class="derecha">
+                {{ `${parseFloat(item.precioUni).toFixed(2)}` }}
+              </td>
+              <td class="derecha">
+                {{ `${parseFloat(item.importe).toFixed(2)}` }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div>Total Productos: {{ ventaDatosPrint.length }}</div>
+        <div>Sub total Alimentos: $ {{ pagoPrint.total }}</div>
+        <div><strong>Total: $ {{ pagoPrint.total }}</strong></div>
+        <div id="montoLetras">{{ genTotalLetter(pagoPrint.total) }}</div>
+        <div>Total con IVA incluido</div>
+        <table>
+          <thead>
+            <tr class="izquierdo">
+              <th>---Forma de Pago---</th>
+              <th>Importe</th>
+              <th>Propina</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="pagoPrint.pagoEf != null">
+              <td>Efectivo</td>
+              <td class="derecha">{{ pagoPrint.pagoEf.monto }}</td>
+              <td class="derecha">{{ pagoPrint.pagoEf.propina }}</td>
+            </tr>
+            <tr v-if="pagoPrint.pagoTj != null">
+              <td>
+                {{ `${pagoPrint.pagoTj.aceptacion} T/${pagoPrint.pagoTj.tipo}` }}
+              </td>
+              <td class="derecha">{{ pagoPrint.pagoTj.monto }}</td>
+              <td class="derecha">{{ pagoPrint.pagoTj.propina }}</td>
+            </tr>
+            <tr>
+              <td>Servicio</td>
+              <td class="derecha">{{ sumPropina() }}</td>
+              <td class="derecha">0.00</td>
+            </tr>
+            <tr>
+              <td>-----------------------></td>
+              <td class="derecha">{{ sumTotal(sumPropina()) }}</td>
+              <td class="derecha">{{ sumPropina() }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <br>
+        <div class="text-pe">Regimen general de la ley personas morales</div>
+        <div class="text-pe">Agradecemos su preferencia</div>
+        <div class="text-pe">Tel. 241 417 6800</div>
+        <div class="text-pe">Correo: loscandiles@hoteldelangel.com.mx</div>
+        <div class="text-pe">Mesero: {{ mesero  }}</div>
+        <div class="text-pe">Usuario: {{ usuario }}</div>
       </div>
     </div>
     <v-col cols="8" sm="6" md="3">
@@ -373,7 +433,9 @@ export default {
   },
   props: [
     "idVenta",
-    "mesas"
+    "mesas",
+    "comensales",
+    "usuario"
   ],
   data: () => ({
     tiposTarjeta: [],
@@ -434,7 +496,8 @@ export default {
     },
     statusPropina: false,
     btnPay: false,
-    folioPago: ''
+    pagoPrint: null,
+    mesero: ''
   }),
   computed: {
     ...mapState(["BASE_URL","AuthToken"])
@@ -466,8 +529,10 @@ export default {
         console.log(res.data);
         let data = res.data;
         if (data.status == 'OK') {
-          this.ventaDatos = data.res;
-          //this.ventaDatosPrint = JSON.parse(JSON.stringify(data.res));
+          this.ventaDatos = data.res.venta;
+          this.pagoPrint = data.res.pago;
+          this.mesero = `${data.res.mesero.nombre} ${data.res.mesero.apellidos}`;
+          this.ventaDatosPrint = JSON.parse(JSON.stringify(data.res.venta));
           this.loading = false;
           this.ventaDatos.length > 0 ? this.genTotal() : '';
         } else {
@@ -482,11 +547,11 @@ export default {
     async genTotal(){
       var countTotal = 0;
       await this.ventaDatos.forEach((produc, i) => {
-        countTotal += parseInt(produc.importe);
+        countTotal += parseFloat(produc.importe);
         this.ventaDatos[i].cantidadUniHtml = `<div class="text-center">${produc.cantidad}</div>`;
-        this.ventaDatos[i].productoHtml = `<div class="width-produ">${produc.producto}</div>`;
-        this.ventaDatos[i].precioUniHtml = `<div class="derechaAling">${parseInt(produc.precioUni).toFixed(2)}</div>`;
-        this.ventaDatos[i].importeHtml = `<div class="derechaAling">${parseInt(produc.importe).toFixed(2)}</div>`;
+        this.ventaDatos[i].productoHtml = `<div class="width-produ">${produc.nombreProducto}</div>`;
+        this.ventaDatos[i].precioUniHtml = `<div class="derechaAling">${parseFloat(produc.precioUni).toFixed(2)}</div>`;
+        this.ventaDatos[i].importeHtml = `<div class="derechaAling">${parseFloat(produc.importe).toFixed(2)}</div>`;
       });
       this.precioTotal = countTotal;
       
@@ -549,9 +614,9 @@ export default {
         var statusEfectivo = true;
       }else {
         if(this.pago.efectivo.statusFac === true){
-          var statusEfectivo = (this.pago.efectivo.monto != '' && parseInt(this.pago.efectivo.monto) > 0 && this.pago.efectivo.factura != '') ? true : false;
+          var statusEfectivo = (this.pago.efectivo.monto != '' && parseFloat(this.pago.efectivo.monto) > 0 && this.pago.efectivo.factura != '') ? true : false;
         }else{
-           var statusEfectivo = (this.pago.efectivo.monto != '' && parseInt(this.pago.efectivo.monto) > 0) ? true : false;
+           var statusEfectivo = (this.pago.efectivo.monto != '' && parseFloat(this.pago.efectivo.monto) > 0) ? true : false;
         }
       }
       //validación tarjetas
@@ -559,18 +624,18 @@ export default {
         var statusTarjetaCD = true;
       }else {
         if(this.pago.tarjetaCD.statusFac === true){
-          var statusTarjetaCD = (this.pago.tarjetaCD.monto != '' && parseInt(this.pago.tarjetaCD.monto) > 0 && this.pago.tarjetaCD.bouche != '' && this.pago.tarjetaCD.factura != '' && this.pago.tarjetaCD.tipoT != '' && this.pago.tarjetaCD.tipoA != '' && this.pago.tarjetaCD.numTarjeta != '' && this.pago.tarjetaCD.cvc != '') ? true : false;
+          var statusTarjetaCD = (this.pago.tarjetaCD.monto != '' && parseFloat(this.pago.tarjetaCD.monto) > 0 && this.pago.tarjetaCD.bouche != '' && this.pago.tarjetaCD.factura != '' && this.pago.tarjetaCD.tipoT != '' && this.pago.tarjetaCD.tipoA != '' && this.pago.tarjetaCD.numTarjeta != '' && this.pago.tarjetaCD.cvc != '') ? true : false;
         }else{
-           var statusTarjetaCD = (this.pago.tarjetaCD.monto != '' && parseInt(this.pago.tarjetaCD.monto) > 0 && this.pago.tarjetaCD.bouche != '' && this.pago.tarjetaCD.tipoT != '' && this.pago.tarjetaCD.tipoA != '' && this.pago.tarjetaCD.numTarjeta != '' && this.pago.tarjetaCD.cvc != '') ? true : false;
+           var statusTarjetaCD = (this.pago.tarjetaCD.monto != '' && parseFloat(this.pago.tarjetaCD.monto) > 0 && this.pago.tarjetaCD.bouche != '' && this.pago.tarjetaCD.tipoT != '' && this.pago.tarjetaCD.tipoA != '' && this.pago.tarjetaCD.numTarjeta != '' && this.pago.tarjetaCD.cvc != '') ? true : false;
         }
       }
 
       if(statusEfectivo && statusTarjetaCD){
         this.pago.efectivo.monto = this.pago.efectivo.monto == '' ? 0 : this.pago.efectivo.monto;
         this.pago.tarjetaCD.monto = this.pago.tarjetaCD.monto == '' ? 0 : this.pago.tarjetaCD.monto;
-        console.log('suma ' + parseInt(this.pago.efectivo.monto) + parseInt(this.pago.tarjetaCD.monto));
+        console.log('suma ' + parseFloat(this.pago.efectivo.monto) + parseFloat(this.pago.tarjetaCD.monto));
         console.log('total ' + this.precioTotal);
-        if(parseInt(this.pago.efectivo.monto) + parseInt(this.pago.tarjetaCD.monto) == parseInt(this.precioTotal)){
+        if(parseFloat(this.pago.efectivo.monto) + parseFloat(this.pago.tarjetaCD.monto) == parseFloat(this.precioTotal)){
           //this.genTicketFinal();
           this.pay();
         }else{
@@ -595,7 +660,7 @@ export default {
         console.log(res.data);
         if (res.data.status == 'OK') {
           this.alert('Guardado!',' ','success', 1500);
-          this.folioPago = res.data.res;
+          this.pagoPrint = res.data.res;
           this.btnPay = false;
           this.resetPago();
         } else {
@@ -627,35 +692,63 @@ export default {
             .text-center2 { text-align: center; }
             .izquierdo { text-align: left; }
             .derecha { text-align: right; }
-            .tableProd { font-size: 10pt; }
+            #montoLetras { font-size: 8pt; }
+            .text-pe { font-size: 11pt; }
             
-          `
+          `,
+          scanStyles: false
+          //font_size: '10pt'
         }
       );
     },
     resetAll(){
       this.loading = true;
       this.ventaDatos = [];
-      //this.ventaDatosPrint = [];
+      this.pagoPrint = null;
+      this.ventaDatosPrint = [];
       this.precioTotal = 0;
       this.statusPago = false;
       this.statusPropina = false;
       this.pago = JSON.parse(JSON.stringify(this.pagoDefaul));
+      this.pagoPrint = null;
+      this.mesero = '';
     },
     resetPago(){
       this.statusPago = false;
       this.statusPropina = false;
       this.pago = JSON.parse(JSON.stringify(this.pagoDefaul));
     },
-    restrigirChars(event) {//admite solo numeros
+    restrigirChars(event) {//admite numeros y el punto
       if (
         event.charCode === 0 ||
-        /\d/.test(String.fromCharCode(event.charCode))
+        /\d/.test(String.fromCharCode(event.charCode)) ||
+        event.charCode === 46 //46 equivalente a .
       ) {
         return true;
       } else {
         event.preventDefault();
       }
+    },
+    formatDate(fecha){ //parametro => '2017-01-10'
+      return fecha.replace(/^(\d{4})-(\d{2})-(\d{2})$/g,'$3/$2/$1'); //respuesta => '10/01/2017'
+    },
+    genTotalLetter(cantidad){
+      var cant = cantidad;
+      var catDiv = cant.split(".");
+      //console.log(catDiv)
+      var pesos = catDiv[0];
+      var centavos = catDiv[1];
+      var letterCant = funcionesG.NumeroALetras(pesos);
+      //console.log(letterCant)
+      return `(${letterCant} ${centavos}/100 M.N.)`;
+    },
+    sumPropina(){
+      var propinaT = parseFloat(this.pagoPrint.pagoEf.propina) + parseFloat(this.pagoPrint.pagoTj.propina);
+      return propinaT.toFixed(2);
+    },
+    sumTotal(propinaT){
+      var total = parseFloat(this.precioTotal) + parseFloat(propinaT);
+      return total;
     },
     alert(title, text, icon, timer){
       swal({
