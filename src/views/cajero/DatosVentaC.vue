@@ -314,9 +314,9 @@
       <v-data-table
         :headers="headers"
         :items="ventaDatos"
-        :items-per-page="10"
         class="elevation-1"
         :loading="loading"
+        hide-default-footer
       >
         <!-- <template v-slot:[`item.nombreProducto`]="{ item }">
           {{ item.nombreProducto == 'TOTAL' ? '' : item.nombreProducto }}
@@ -412,7 +412,7 @@
         <div class="text-pe">Tel. 241 417 6800</div>
         <div class="text-pe">Correo: loscandiles@hoteldelangel.com.mx</div>
         <div class="text-pe">Mesero: {{ mesero  }}</div>
-        <div class="text-pe">Usuario: {{ usuario }}</div>
+        <div class="text-pe">Usuario: {{ `${pagoPrint.cajero.nombre} ${pagoPrint.cajero.apellidos}` }}</div>
       </div>
     </div>
     <v-col cols="8" sm="6" md="3">
@@ -435,7 +435,7 @@ export default {
     "idVenta",
     "mesas",
     "comensales",
-    "usuario"
+    "id_empleado"
   ],
   data: () => ({
     tiposTarjeta: [],
@@ -633,8 +633,6 @@ export default {
       if(statusEfectivo && statusTarjetaCD){
         this.pago.efectivo.monto = this.pago.efectivo.monto == '' ? 0 : this.pago.efectivo.monto;
         this.pago.tarjetaCD.monto = this.pago.tarjetaCD.monto == '' ? 0 : this.pago.tarjetaCD.monto;
-        console.log('suma ' + parseFloat(this.pago.efectivo.monto) + parseFloat(this.pago.tarjetaCD.monto));
-        console.log('total ' + this.precioTotal);
         if(parseFloat(this.pago.efectivo.monto) + parseFloat(this.pago.tarjetaCD.monto) == parseFloat(this.precioTotal)){
           //this.genTicketFinal();
           this.pay();
@@ -654,6 +652,7 @@ export default {
         const path = `${this.BASE_URL}ventas/pay/`;
         let dataPost = new FormData();
         dataPost.append("idVenta", this.idVenta);
+        dataPost.append("id_empleado", this.id_empleado);
         dataPost.append("precioTotal", this.precioTotal);
         dataPost.append("pago", JSON.stringify(this.pago));
         let res = await axios.post(path, dataPost, this.AuthToken);
@@ -662,6 +661,7 @@ export default {
           this.alert('Guardado!',' ','success', 1500);
           this.pagoPrint = res.data.res;
           this.btnPay = false;
+          this.$emit("click");
           this.resetPago();
         } else {
           this.alert('Error!','Intentalo de nuevo comuníquese a soporte','error', 2000);
@@ -743,7 +743,9 @@ export default {
       return `(${letterCant} ${centavos}/100 M.N.)`;
     },
     sumPropina(){
-      var propinaT = parseFloat(this.pagoPrint.pagoEf.propina) + parseFloat(this.pagoPrint.pagoTj.propina);
+      var propinaEf = this.pagoPrint.pagoEf == null ? 0 : this.pagoPrint.pagoEf.propina;
+      var propinaTj = this.pagoPrint.pagoTj == null ? 0 : this.pagoPrint.pagoTj.propina;
+      var propinaT = parseFloat(propinaEf) + parseFloat(propinaTj);
       return propinaT.toFixed(2);
     },
     sumTotal(propinaT){

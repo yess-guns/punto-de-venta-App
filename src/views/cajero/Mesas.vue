@@ -4,6 +4,14 @@
     <v-container>
       <v-card-title>
         Mesas - Ventas 
+        <v-btn
+          icon
+          color="green"
+          @click="getMesasVenta"
+          x-large
+        >
+          <v-icon>mdi-refresh</v-icon>
+        </v-btn>
         <v-spacer></v-spacer>
       </v-card-title>
       <v-card :loading="loading">
@@ -44,7 +52,7 @@
         </v-col>
       </v-row>
     </v-container>
-    <Venta ref="ventaC" />
+    <Venta ref="ventaC" @click="getMesasVenta"/>
   </v-card> 
 </template>
 
