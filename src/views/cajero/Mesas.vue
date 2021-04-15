@@ -4,14 +4,21 @@
     <v-container>
       <v-card-title>
         Mesas - Ventas 
-        <v-btn
-          icon
-          color="green"
-          @click="getMesasVenta"
-          x-large
-        >
-          <v-icon>mdi-refresh</v-icon>
-        </v-btn>
+        <v-tooltip right>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              icon
+              color="green"
+              @click="getMesasVenta"
+              x-large
+              v-bind="attrs"
+              v-on="on"
+            >
+              <v-icon>mdi-refresh</v-icon>
+            </v-btn>
+          </template>
+          <span>Recargar</span>
+        </v-tooltip>
         <v-spacer></v-spacer>
       </v-card-title>
       <v-card :loading="loading">

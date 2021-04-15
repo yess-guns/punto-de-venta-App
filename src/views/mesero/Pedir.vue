@@ -35,12 +35,28 @@
           >                   
           </v-autocomplete>
         </v-col>
-        <v-col  sm="6" md="3">
+        <v-col  sm="4" md="1">
           <v-text-field
             label="Comensal"
             v-model="comensal"
             @keypress="restrigirChars($event)"
           ></v-text-field>
+        </v-col>
+        <v-col  sm="4" md="2">
+          <v-radio-group
+            row
+            label="Tiempo"
+            v-model="tiempoP"
+          >
+            <v-radio
+              label="1"
+              value="1"
+            ></v-radio>
+            <v-radio
+              label="2"
+              value="2"
+            ></v-radio>
+          </v-radio-group>
         </v-col>
         <v-col cols="12" sm="6" md="3">
           <v-btn
@@ -61,49 +77,65 @@
               <v-col cols="12" class="text-center text-decoration-underline" >
                 <h3 class="blue--text">
                   Cocina
-                  <v-btn
-                    color="error"
-                    icon
-                    @click="printOrden(pedidoCocina, comentCocina), btnCocina = false"
-                  >
-                    <v-icon>mdi-printer</v-icon>
-                  </v-btn>
-                  <v-btn
-                    color="success"
-                    icon
-                    :loading="btnSave"
-                    :disabled="btnCocina"
-                    @click="savePedido(pedidoCocina, 'Cocina')"
-                  >
-                    <v-icon>mdi-content-save</v-icon>
-                  </v-btn>
+                  <v-tooltip left>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-btn
+                        color="error"
+                        icon
+                        x-large
+                        @click="printOrdenCocina()"
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        <v-icon>mdi-printer</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Imprimir pedido</span>
+                  </v-tooltip>
+                  <v-tooltip right>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-btn
+                        color="success"
+                        icon
+                        x-large
+                        :loading="btnSave"
+                        :disabled="btnCocina"
+                        @click="savePedido(pedidoCocina, 'Cocina')"
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        <v-icon>mdi-content-save</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Guardar Pedido</span>
+                  </v-tooltip>
                 </h3>
               </v-col>
             </v-row>
             <v-row class="blue-grey lighten-3 mr-1">
-              <v-col cols="3">
+              <v-col cols="2">
                 Comenzal
               </v-col>
-              <v-col cols="5">
+              <v-col cols="6">
                 Producto
               </v-col>
               <v-col cols="2">
-                Precio
+                Tiempo
               </v-col>
               <v-col cols="2">
-                
+
               </v-col>
             </v-row>
             <template v-for="(pedido, index) in pedidoCocina">
               <v-row :key="index">
-                <v-col md="3">
+                <v-col md="2">
                   {{pedido.comensal}}
                 </v-col>
-                <v-col md="5">
+                <v-col md="6">
                   {{pedido.nombreProducto}}
                 </v-col>
                 <v-col md="2">
-                  ${{pedido.precio}}
+                  {{pedido.tiempoP}}
                 </v-col>
                 <v-col md="2">
                   <v-btn icon @click="deleteProdCocina(index)">
@@ -151,34 +183,50 @@
               <v-col cols="12" class="text-center text-decoration-underline" >
                 <h3 class="blue--text">
                   Bar
-                  <v-btn
-                    color="error"
-                    icon
-                    @click="printOrden(pedidoBar, comentBar), btnBar = false"
-                  >
-                    <v-icon>mdi-printer</v-icon>
-                  </v-btn>
-                  <v-btn
-                    color="success"
-                    icon
-                    :loading="btnSave"
-                    :disabled="btnBar"
-                    @click="savePedido(pedidoBar, 'Bar')"
-                  >
-                    <v-icon>mdi-content-save</v-icon>
-                  </v-btn>
+                  <v-tooltip left>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-btn
+                        color="error"
+                        icon
+                        x-large
+                        @click="printOrdenBar()"
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        <v-icon>mdi-printer</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Imprimir Pedido</span>
+                  </v-tooltip>
+                  <v-tooltip right>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-btn
+                        color="success"
+                        icon
+                        x-large
+                        :loading="btnSave"
+                        :disabled="btnBar"
+                        @click="savePedido(pedidoBar, 'Bar')"
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        <v-icon>mdi-content-save</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Guardar Pedido</span>
+                  </v-tooltip>
                 </h3>
               </v-col>
             </v-row>
             <v-row class="blue-grey lighten-3 mr-1">
-              <v-col cols="3">
+              <v-col cols="2">
                 Comenzal
               </v-col>
-              <v-col cols="5">
+              <v-col cols="6">
                 Producto
               </v-col>
               <v-col cols="2">
-                Precio
+                Tiempo
               </v-col>
               <v-col cols="2">
                 
@@ -186,14 +234,14 @@
             </v-row>
             <template v-for="(pedido, index) in pedidoBar">
               <v-row :key="index">
-                <v-col md="3">
+                <v-col md="2">
                   {{pedido.comensal}}
                 </v-col>
-                <v-col md="5">
+                <v-col md="6">
                   {{pedido.nombreProducto}}
                 </v-col>
                 <v-col md="2">
-                  ${{pedido.precio}}
+                  {{pedido.tiempoP}}
                 </v-col>
                 <v-col md="2">
                   <v-btn icon @click="deleteProdBar(index)">
@@ -260,6 +308,7 @@ export default {
     cateSelec: '',
     producSelect: null,
     comensal: '',
+    tiempoP: "1",
 
     nameCate: '',
     dataProd: {},
@@ -315,11 +364,15 @@ export default {
     },
     addProducto(){
       this.dataProd.comensal = this.comensal;
-      this.dataProd.comensalHtml = `<p class="text-center">${this.comensal}</p>`;
+      this.dataProd.tiempoP = this.tiempoP;
+      this.dataProd.comensalHtml = `<div class="text-center">${this.comensal}</div>`;
+      this.dataProd.tiempoPHtml = `<div class="text-center">${this.tiempoP}</div>`;
       if(this.dataProd.nombreDestino == "Cocina"){
         this.pedidoCocina.push(this.dataProd);
+        this.pedidoCocina.sort((a, b) => a.tiempoP - b.tiempoP);
       }else if(this.dataProd.nombreDestino == "Bar"){
         this.pedidoBar.push(this.dataProd);
+        this.pedidoBar.sort((a, b) => a.tiempoP - b.tiempoP);
       }
       
       this.resetForm();
@@ -330,19 +383,40 @@ export default {
     deleteProdBar(index){
       this.pedidoBar.splice(index, 1);
     },
-    printOrden(productos, comentario){
+    printOrdenBar(){
+      this.btnBar = false;
       print(
         {
-          header: '<h3 class="custom-h3">Pedido - Mesa: '+this.mesas+' </h3> <div id="inferior">*'+comentario+'</div>',
-          printable: productos,
+          header: '<h3 class="text-center">Pedido - Mesa: '+this.mesas+' <br>******Bar******</h3> <div id="inferior">*'+this.comentBar+'</div>',
+          printable: this.pedidoBar,
           properties: [
             { field: 'comensalHtml', displayName: 'Comenzal' },
-            { field: 'nombreProducto', displayName: 'Producto'}
+            { field: 'nombreProducto', displayName: `<div class ="productohtml">Producto</div>`}
           ],
           type: 'json',
-          gridHeaderStyle: 'border-bottom: 2px solid #3971A5;',
-          gridStyle: 'border: 2px solid #fff;',
-          style: '.text-center { text-align: center; } #inferior {position:absolute; left:0px; right:0px; bottom:0px; height:50px; z-index:0;}'
+          gridHeaderStyle: 'color: red;  border: 2px solid #3971A5;',
+	        gridStyle: 'border: 2px solid #3971A5; height:5px;',
+          style: '.text-center { text-align: center; } #inferior {position:absolute; left:0px; right:0px; bottom:0px; height:50px; z-index:0;} .productohtml {width:210px;}',
+          scanStyles: false
+        }
+      )
+    },
+    printOrdenCocina(){
+      this.btnCocina = false;
+      print(
+        {
+          header: '<h3 class="text-center">Pedido - Mesa: '+this.mesas+' <br>******Cocina******</h3> <div id="inferior">*'+this.comentCocina+'</div>',
+          printable: this.pedidoCocina,
+          properties: [
+            { field: 'comensalHtml', displayName: 'Comenzal' },
+            { field: 'nombreProducto', displayName: `<div class ="productohtml">Producto</div>`},
+            { field: 'tiempoPHtml', displayName: 'Tiempo'}
+          ],
+          type: 'json',
+          gridHeaderStyle: 'color: red;  border: 2px solid #3971A5;',
+	        gridStyle: 'border: 2px solid #3971A5; height:5px;',
+          style: '.text-center { text-align: center; } #inferior {position:absolute; left:0px; right:0px; bottom:0px; height:50px; z-index:0;} .productohtml {width:200px;}',
+          scanStyles: false
         }
       )
     },
@@ -383,6 +457,7 @@ export default {
     resetForm(){
       this.producSelect = '';
       this.comensal = '';
+      this.tiempoP = "1";
       this.dataProd = {};
     },
     resetPedido(){

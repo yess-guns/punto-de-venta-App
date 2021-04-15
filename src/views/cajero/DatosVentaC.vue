@@ -86,7 +86,7 @@
                     v-on="on"
                   >
                     <v-icon x-large>
-                      mdi-cash-usd
+                      mdi-currency-usd-circle-outline
                     </v-icon>
                   </v-btn>
                 </template>
@@ -242,41 +242,18 @@
           <v-divider></v-divider>
           <v-row v-if="pago.efectivo.status || pago.tarjetaCD.status" justify="end">
             <v-col cols="3" class="my-3 text-right">
-              <v-tooltip right>
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn
-                    color="success"
-                    @click="validPago"
-                    :loading="btnPay"
-                    icon
-                    v-bind="attrs"
-                    v-on="on"
-                  >
-                    <v-icon color="success" x-large>
-                      mdi-printer-check
-                    </v-icon>
-                  </v-btn>
-                </template>
-                <span>Pagar</span>
-              </v-tooltip>
-            </v-col>
-            <v-col cols="3" class="my-3 text-right">
-              <v-tooltip right>
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn
-                    color="success"
-                    @click="validPago"
-                    icon
-                    v-bind="attrs"
-                    v-on="on"
-                  >
-                    <v-icon color="success" x-large>
-                      mdi-content-save
-                    </v-icon>
-                  </v-btn>
-                </template>
-                <span>Guardar</span>
-              </v-tooltip>
+              <v-btn
+                color="primary"
+                @click="validPago"
+                :loading="btnPay"
+                v-bind="attrs"
+                v-on="on"
+              >
+                <v-icon color="warning">
+                  mdi-currency-usd
+                </v-icon>
+                Pagar
+              </v-btn>
             </v-col>
           </v-row>
         </v-col>
