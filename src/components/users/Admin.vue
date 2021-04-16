@@ -29,18 +29,22 @@
       <v-divider></v-divider>
 
       <v-tabs vertical v-model="tab">
+        <v-tab href="#tab-Home" @click="drawer = !drawer">
+          Inicio
+        </v-tab>
+        <v-divider></v-divider>
         <v-tab href="#tab-Insumos" @click="drawer = !drawer">
-          <v-icon left>
-            mdi-account
-          </v-icon>
           Insumos
         </v-tab>
+        <v-divider></v-divider>
         <v-tab href="#tab-Productos" @click="drawer = !drawer">
-          <v-icon left>
-            mdi-lock
-          </v-icon>
           Productos
         </v-tab>
+        <v-divider></v-divider>
+        <v-tab href="#tab-Ventas" @click="drawer = !drawer">
+          Estatus Ventas
+        </v-tab>
+        <v-divider></v-divider>
       </v-tabs>
 
       <v-footer fixed>
@@ -51,6 +55,13 @@
     </v-navigation-drawer>
     <!--Elementos del menú-->
     <v-tabs-items v-model="tab">
+      <v-tab-item value="tab-Home">
+        <v-card flat>
+          <v-card-text>
+            Inicio
+          </v-card-text>
+        </v-card>
+      </v-tab-item>
       <v-tab-item value="tab-Insumos">
         <v-card flat>
           <v-card-text>
@@ -65,6 +76,14 @@
           </v-card-text>
         </v-card>
       </v-tab-item>
+
+      <v-tab-item value="tab-Ventas">
+        <v-card flat>
+          <v-card-text>
+            <IndexVentas />
+          </v-card-text>
+        </v-card>
+      </v-tab-item>
     </v-tabs-items> 
   </div>
 </template>
@@ -73,15 +92,17 @@
 import { mapMutations } from 'vuex';
 import IndexInsumos from '@/views/admin/insumos/Index';
 import IndexIProductos from '@/views/admin/productos/Index';
+import IndexVentas from '@/views/admin/ventas/Index';
 export default {
   name: "Admin",
   components: {
     IndexInsumos,
-    IndexIProductos
+    IndexIProductos,
+    IndexVentas
   },
   data: () => ({
     tab: null,
-    drawer: null
+    drawer: true
   }),
   computed: {},
   methods: {
@@ -93,3 +114,8 @@ export default {
   },
 };
 </script>
+<style scoped>
+  .v-tab {
+    justify-content: left;
+  }
+</style>

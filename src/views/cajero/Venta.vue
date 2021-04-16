@@ -263,6 +263,7 @@ export default {
           this.btnFin = false;
           this.closeDialog();
           this.$emit("click");
+          this.alert('Venta Finalizada','','success', 2000);
         } else {
           this.alert('Error!','Inténtalo de nuevo o comuníquese a soporte','error', 2000);
           this.btnFin = false;
@@ -287,6 +288,7 @@ export default {
           this.btnCancel = false;
           this.closeDialog();
           this.$emit("click");
+          this.alert('Venta Cancelada','','success', 2000);
         } else {
           this.alert('Error!','Inténtalo de nuevo o comuníquese a soporte','error', 2000);
           this.btnCancel = false;
@@ -297,6 +299,15 @@ export default {
         this.btnCancel = false;
       }
     },
+    alert(title, text, icon, timer){
+      swal({
+        title: title,
+        text: text,
+        icon: icon,
+        timer: timer,
+        button: false,
+      });
+    }
   },
 
   created(){

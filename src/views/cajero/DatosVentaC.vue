@@ -727,7 +727,7 @@ export default {
     },
     sumTotal(propinaT){
       var total = parseFloat(this.precioTotal) + parseFloat(propinaT);
-      return total;
+      return total.toFixed(2);
     },
     alert(title, text, icon, timer){
       swal({
