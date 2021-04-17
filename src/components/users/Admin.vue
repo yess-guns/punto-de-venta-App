@@ -42,7 +42,11 @@
         </v-tab>
         <v-divider></v-divider>
         <v-tab href="#tab-Ventas" @click="drawer = !drawer">
-          Estatus Ventas
+          Ventas
+        </v-tab>
+        <v-divider></v-divider>
+        <v-tab href="#tab-Reporte-Ventas" @click="drawer = !drawer">
+          Reporte Ventas
         </v-tab>
         <v-divider></v-divider>
       </v-tabs>
@@ -84,6 +88,15 @@
           </v-card-text>
         </v-card>
       </v-tab-item>
+      
+      <v-tab-item value="tab-Reporte-Ventas">
+        <v-card flat>
+          <v-card-text>
+            <ReporteVentas />
+          </v-card-text>
+        </v-card>
+      </v-tab-item>
+
     </v-tabs-items> 
   </div>
 </template>
@@ -93,12 +106,14 @@ import { mapMutations } from 'vuex';
 import IndexInsumos from '@/views/admin/insumos/Index';
 import IndexIProductos from '@/views/admin/productos/Index';
 import IndexVentas from '@/views/admin/ventas/Index';
+import ReporteVentas from '@/views/admin/ventas/ReporteVentas';
 export default {
   name: "Admin",
   components: {
     IndexInsumos,
     IndexIProductos,
-    IndexVentas
+    IndexVentas,
+    ReporteVentas
   },
   data: () => ({
     tab: null,

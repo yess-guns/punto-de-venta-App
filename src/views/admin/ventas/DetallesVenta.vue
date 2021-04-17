@@ -171,8 +171,6 @@ export default {
   methods: {
     showDialog(dataVenta){
       this.dataVenta = dataVenta;
-      //this.empleado = '';
-      //this.empleado = `${empleado.nombreEmpleado} ${empleado.apellidosEmpleado}`;
       this.dialog = true;
       this.getDatosVenta(dataVenta.id_venta);
     },
@@ -197,37 +195,11 @@ export default {
         this.loading = false;
       }
     },
-    async dataVenta1(id_venta){
-      this.loading = true;
-      this.mesas = '';
-      const path = `${this.BASE_URL}ventas/ventaById/${id_venta}`;
-      try {
-        let res = await axios.get(path, this.AuthToken);
-        console.log(res.data);
-        let data = res.data;
-        if (res.data.status == 'OK') {
-          var mesas = res.data.mesas;
-          this.comensales = res.data.comensales;
-          this.statusPago = res.data.statusPago;
-          let signoComa = 0;
-          mesas.forEach((mesa, i) =>{
-            signoComa = ((i + 1) == mesas.length) ? '' : ', ';
-            this.mesas += `${mesa.numero}${signoComa}`;
-          });
-          //console.log(this.mesas)
-          //this.mesas = data.res;
-          this.loading = false;
-        } else {
-          this.loading = false;
-        }
-      } catch (error) {
-        console.log(error)
-        this.alert('Error!','Revise su conexión o comuniquese a soporte','error', 2000);
-        this.loading = false;
-      }
-    },
     closeDialog(){
       this.dialog = false;
+      this.dataVenta = {};
+      this.ventaDatos = [];
+      this.dataPago = null;
     },
     statusVentaTxt(status){
       switch (status) {
