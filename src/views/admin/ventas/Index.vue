@@ -115,7 +115,7 @@ export default {
           this.ventas = res.data.dataV;
           this.spanishDate = functionsDate.fechaES(this.date);
         }else{
-          this.alert('Error!','No hay ventas en esta fecha','error', 2000);
+          //this.alert('Error!','No hay ventas en esta fecha','error', 2000);
           this.spanishDate = functionsDate.fechaES(this.date);
         }
       } catch (error) {

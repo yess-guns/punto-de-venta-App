@@ -53,7 +53,7 @@
                 </template>
               </v-card>
             </v-row>
-            <v-row >
+            <v-row class="my-3">
               <v-col cols="4">
                 <h3>Comensales: {{ dataVenta.comensales }}</h3> 
               </v-col>
@@ -64,7 +64,49 @@
                 <h3>Mesero: {{ dataVenta.nombreM + ' ' + dataVenta.apeM }}</h3> 
               </v-col>              
             </v-row>
+            <v-divider></v-divider>
             <v-row>
+              <v-col cols="12" class="text-center" v-if="dataPago != null">
+                <h2 class="my-5">Datos Pago</h2>
+                <v-divider></v-divider>
+                <v-simple-table dense>
+                  <template v-slot:default>
+                    <thead>
+                      <tr>
+                        <th class="text-center">
+                          Folio
+                        </th>
+                        <th class="text-center">
+                          $ Total
+                        </th>
+                        <th class="text-center">
+                          $ Efectivo
+                        </th>
+                        <th class="text-center">
+                          $ Tarjeta
+                        </th>
+                        <th class="text-center">
+                          Hora
+                        </th>
+                        <th class="text-left">
+                          Empleado
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>{{ dataPago.folio }}</td>
+                        <td>$ {{ dataPago.total }}</td>
+                        <td>$ {{ dataPago.pagoEf == null ? "0.00" : dataPago.pagoEf.monto }}</td>
+                        <td>$ {{ dataPago.pagoTj == null ? "0.00" : dataPago.pagoTj.monto }}</td>
+                        <td>{{ dataPago.hora }}</td>
+                        <td class="text-left">{{ dataPago.cajero.nombre + ' ' + dataPago.cajero.apellidos }}</td>
+                      </tr>
+                    </tbody>
+                  </template>
+                </v-simple-table>
+                <v-divider></v-divider>
+              </v-col>
               <v-col cols="12">
                 <v-card>
                   <v-card-title>
@@ -115,6 +157,7 @@ export default {
     loading: false,
     dataVenta: {},
     ventaDatos: [],
+    dataPago: null,
     headers: [
       { text: "Comenzal", value: "comenzal" },
       { text: "Producto", value: "nombreProducto" },
@@ -142,7 +185,8 @@ export default {
         console.log(res.data);
         let data = res.data;
         if (data.status == 'OK') {
-          this.ventaDatos = data.res;
+          this.ventaDatos = data.res.platillos;
+          this.dataPago = data.res.pago;
           this.loading = false;
         } else {
           this.loading = false;
@@ -153,7 +197,7 @@ export default {
         this.loading = false;
       }
     },
-    async dataVenta(id_venta){
+    async dataVenta1(id_venta){
       this.loading = true;
       this.mesas = '';
       const path = `${this.BASE_URL}ventas/ventaById/${id_venta}`;
