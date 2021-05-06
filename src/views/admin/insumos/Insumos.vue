@@ -14,6 +14,10 @@
         </v-icon>
       </v-btn>
       <v-spacer></v-spacer>
+       <v-text-field
+          v-model="search"
+          label="Buscar"
+        ></v-text-field>
     </v-card-title>
     
     <v-data-table
@@ -21,6 +25,7 @@
       :items="insumos"
       class="elevation-1"
       :loading="loading"
+      :search="search"
     >
       <template v-slot:[`item.nombreInsumo`]="{ item }">
         <div @click="openDialogEdit(item)">
@@ -218,7 +223,8 @@ export default {
     dialogEdit: false,
     nombreIEdit: '',
     buttonSaveEdit: false,
-    id_insumo: 0
+    id_insumo: 0,
+    search: ''
   }),
   created(){
     this.getInsumos();

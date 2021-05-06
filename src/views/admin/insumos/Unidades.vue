@@ -14,6 +14,10 @@
         </v-icon>
       </v-btn>
       <v-spacer></v-spacer>
+      <v-text-field
+          v-model="search"
+          label="Buscar"
+        ></v-text-field>
     </v-card-title>
     
     <v-data-table
@@ -22,6 +26,7 @@
       :items-per-page="5"
       class="elevation-1"
       :loading="loading"
+      :search="search"
     >
       <template v-slot:[`item.nombreUnidad`]="{ item }">
         <div @click="openDialogEdit(item)">
@@ -51,6 +56,7 @@
 
         <v-card-actions>
           <v-spacer></v-spacer>
+
           <v-btn color="blue darken-1" text @click="dialog = !dialog">
               Cancelar
           </v-btn>
@@ -126,7 +132,8 @@ export default {
     dialogEdit: false,
     nombreUEdit: '',
     buttonSaveEdit: false,
-    id_unidad: 0
+    id_unidad: 0,
+    search: ''
   }),
   created(){
     this.getUnidades();

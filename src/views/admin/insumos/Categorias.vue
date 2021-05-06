@@ -14,6 +14,10 @@
         </v-icon>
       </v-btn>
       <v-spacer></v-spacer>
+      <v-text-field
+          v-model="search"
+          label="Buscar"
+        ></v-text-field>
     </v-card-title>
     
     <v-data-table
@@ -22,6 +26,7 @@
       :items-per-page="5"
       class="elevation-1"
       :loading="loading"
+      :search="search"
     >
       <template v-slot:[`item.nombreCategoriaIn`]="{ item }">
         <div @click="openDialogEdit(item)">
@@ -126,7 +131,8 @@ export default {
     dialogEdit: false,
     nombreCEdit: '',
     buttonSaveEdit: false,
-    id_categoriaIn: 0
+    id_categoriaIn: 0,
+    search: ''
   }),
   created(){
     this.getCategorias();

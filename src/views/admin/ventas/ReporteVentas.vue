@@ -1,9 +1,10 @@
 <template>
   <div>
     <v-card>
-      <v-card-title @click="getVentas">
+      <v-card-title>
         Total Ventas: {{ ventas.length}} <v-spacer></v-spacer> 
         Fecha: {{ spanishDate }} <v-spacer></v-spacer>
+        <!-- Buscador por día -->
         <template> 
           <v-menu
             v-model="calendar"
@@ -31,6 +32,7 @@
           </v-menu>
         </template>
         <v-spacer></v-spacer>
+        <!-- Buscador por mes -->
         <v-dialog
           ref="dialog"
           v-model="modalMonth"
@@ -70,6 +72,15 @@
             </v-btn>
           </v-date-picker>
         </v-dialog>
+        <v-spacer></v-spacer>
+        <v-btn
+          color="red"
+          :loading="btnPDF"
+          @click="pdf"
+          v-if="ventas.length > 0"
+        >
+          Exportar <v-icon>mdi-pdf-box</v-icon>
+        </v-btn>
       </v-card-title>
       <v-card-text>
         <v-container>
@@ -105,6 +116,8 @@ import axios from "axios";
 import { mapState } from "vuex";
 import functionsDate from "../../../helpers/funcionesFechas";
 import DetallesVenta from "./DetallesVenta";
+import jsPDF from "jspdf";
+import 'jspdf-autotable';
 export default {
   components: {
     DetallesVenta
@@ -126,7 +139,8 @@ export default {
     dateMonth: '',
     loading: false,
     spanishDate: '',
-    calendar: false
+    calendar: false,
+    btnPDF: false
   }),
   created(){
     this.date = functionsDate.fechaHoy();
@@ -184,6 +198,57 @@ export default {
         this.alert('Error!','Revise su conexión o comuniquese a soporte','error', 2000);
       }
       this.loading = false;
+    },
+    async pdf(){
+      const doc = new jsPDF();
+      this.btnPDF = true;
+      // var lotes = [];
+      // var sumaT = this.sumas;
+      var dataVentas = [];
+      await this.ventas.forEach((venta, index) =>{
+        var pagoEf = venta.pago.pagoEf != null ? venta.pago.pagoEf.monto : '0.00';
+        var pagoTj = venta.pago.pagoTj != null ? venta.pago.pagoTj.monto : '0.00';
+        dataVentas[index] = [
+          venta.fecha,
+          { content: venta.pago.folio, styles: {halign: 'center'} },
+          { content: venta.pago.total, styles: {halign: 'right'} },
+          { content: pagoEf, styles: {halign: 'right'} },
+          { content: pagoTj, styles: {halign: 'right'} },
+          { content: venta.comensales, styles: {halign: 'center'} }
+        ];
+      });
+      
+      
+      doc.setFontSize(16);
+      doc.text(15, 10, 'Reporte Ventas: '+this.spanishDate);
+      doc.autoTable({
+
+        head: [
+          [
+            'Fecha',
+            { content: 'Folio', styles: {halign: 'center'} },
+            { content: 'Total', styles: {halign: 'right'} },
+            { content: 'Efectivo', styles: {halign: 'right'} },
+            { content: 'Tarjeta', styles: {halign: 'right'} },
+            { content: 'Comenzales', styles: {halign: 'center'} }
+          ]
+        ],
+        body: dataVentas
+        ,
+        foot: [
+          [
+            'Total' ,
+            '',
+            { content: `$ ${this.totales.total}`, styles: {halign: 'right'} },
+            { content: `$ ${this.totales.efectivo}`, styles: {halign: 'right'} },
+            { content: `$ ${this.totales.tarjeta}`, styles: {halign: 'right'} },
+            { content: this.totales.comensales, styles: {halign: 'center'} },
+          ]
+        ]
+      });
+      //doc.addPage(); Nueva página
+      doc.save(`Reporte de lotes - ${this.spanishDate}.pdf`);
+      this.btnPDF = false;
     },
     alert(title, text, icon, timer){
       swal({

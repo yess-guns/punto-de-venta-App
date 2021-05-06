@@ -35,30 +35,29 @@
           >                   
           </v-autocomplete>
         </v-col>
-        <v-col  sm="4" md="1">
+        <v-col  sm="3" md="1">
           <v-text-field
             label="Comensal"
             v-model="comensal"
             @keypress="restrigirChars($event)"
           ></v-text-field>
         </v-col>
-        <v-col  sm="4" md="2">
+        <v-col  sm="5" md="3">
           <v-radio-group
             row
             label="Tiempo"
             v-model="tiempoP"
           >
-            <v-radio
-              label="1"
-              value="1"
-            ></v-radio>
-            <v-radio
-              label="2"
-              value="2"
-            ></v-radio>
+            <template v-for="n in 3">
+              <v-radio
+                :key="n"
+                :label="`${n}`"
+                :value="n"
+              ></v-radio>
+            </template>
           </v-radio-group>
         </v-col>
-        <v-col cols="12" sm="6" md="3">
+        <v-col cols="12" sm="4" md="2">
           <v-btn
             color="primary"
             @click="addProducto"
@@ -308,7 +307,7 @@ export default {
     cateSelec: '',
     producSelect: null,
     comensal: '',
-    tiempoP: "1",
+    tiempoP: 1,
 
     nameCate: '',
     dataProd: {},

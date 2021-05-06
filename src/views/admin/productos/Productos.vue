@@ -38,6 +38,11 @@
               </v-icon>
             </v-btn>
             <v-spacer></v-spacer>
+            <v-text-field
+          v-model="search"
+          label="Buscar"
+        ></v-text-field>
+
           </v-card-title>
           <v-container>
             <v-data-table
@@ -46,6 +51,7 @@
               :items-per-page="10"
               class="elevation-1"
               :loading="loading"
+              :search="search"
             >
               <template v-slot:[`item.action`]="{ item }">
                 <v-btn
@@ -131,7 +137,8 @@ export default {
     //Editar Categoria
     dialogEdit: false,
     nombreCEdit: '',
-    buttonSaveEdit: false
+    buttonSaveEdit: false,
+    search: ''
   }),
   created(){
   },
