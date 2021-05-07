@@ -49,6 +49,14 @@
           Reporte Ventas
         </v-tab>
         <v-divider></v-divider>
+        <v-tab href="#tab-Usuarios" @click="drawer = !drawer">
+          Usuarios
+        </v-tab>
+        <v-divider></v-divider>
+        <v-tab href="#tab-Empleados" @click="drawer = !drawer">
+          Empleados
+        </v-tab>
+        <v-divider></v-divider>
       </v-tabs>
 
       <v-footer fixed>
@@ -97,6 +105,22 @@
         </v-card>
       </v-tab-item>
 
+      <v-tab-item value="tab-Usuarios">
+        <v-card flat>
+          <v-card-text>
+            <Usuarios />
+          </v-card-text>
+        </v-card>
+      </v-tab-item>
+
+      <v-tab-item value="tab-Empleados">
+        <v-card flat>
+          <v-card-text>
+            Empleados
+          </v-card-text>
+        </v-card>
+      </v-tab-item>
+
     </v-tabs-items> 
   </div>
 </template>
@@ -107,13 +131,15 @@ import IndexInsumos from '@/views/admin/insumos/Index';
 import IndexIProductos from '@/views/admin/productos/Index';
 import IndexVentas from '@/views/admin/ventas/Index';
 import ReporteVentas from '@/views/admin/ventas/ReporteVentas';
+import Usuarios from '../../views/admin/usuarios/Index';
 export default {
   name: "Admin",
   components: {
     IndexInsumos,
     IndexIProductos,
     IndexVentas,
-    ReporteVentas
+    ReporteVentas,
+    Usuarios,
   },
   data: () => ({
     tab: null,
