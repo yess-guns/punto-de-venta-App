@@ -1,63 +1,23 @@
 <template>
   <v-container>
-    <NewUser :permisos="permisos" @refresh="getUsuarios" />
+    <NevoEmpleado :tiposEmp="tiposEmp" @refresh="getEmpleados" />
     <v-row>
       <v-col>
         <v-data-table
           :headers="headers"
-          :items="dataUsers"
+          :items="dataEmpleados"
           :items-per-page="10"
           class="elevation-1"
-          :loading="loadingU"
+          :loading="loadingE"
         >
-          <template v-slot:[`item.email`]="{ item }">
-            <v-tooltip right>
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn
-                  text
-                  v-bind="attrs"
-                  v-on="on"
-                  @click="openEdit(item.id_usuario,item.email,1)"
-                >
-                  {{ item.email }}
-                </v-btn>
-              </template>
-              <span>Editar</span>
-            </v-tooltip>
-          </template>
-          <template v-slot:[`item.permiso`]="{ item }">
-            <v-tooltip right>
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn
-                  text
-                  v-bind="attrs"
-                  v-on="on"
-                  @click="openEdit(item.id_usuario,item.id_permiso,2)"
-                >
-                  {{ item.permiso }}
-                </v-btn>
-                </template>
-              <span>Editar</span>
-            </v-tooltip>
-          </template>
-          <template v-slot:[`item.pass`]="{ item }">
-            <div class="v-input theme--light v-text-field v-text-field--is-booted">
-              <div class="v-input__control">
-                <div class="v-input__slot">
-                  <div class="v-text-field__slot">
-                    <input type="text" @change="validChangePass($event.target.value,item.id_usuario)">
-                  </div>
-                </div>
-              </div>
-            </div>
-          </template>
-          <template v-slot:[`item.estatus`]="{ item }">
-            <v-switch
-              :input-value="item.estatus == 1 ? true : false"
-              :label="item.estatus == 1 ? 'Activo' : 'Inactivo'"
-              @change="changeStatus(item.id_usuario, item.estatus)"
-              v-if="item.id_usuario != 1"
-            ></v-switch>
+           <template v-slot:[`item.action`]="{ item }">
+            <v-btn
+              rounded
+              color="warning"
+              @click="edit(item)"
+            >
+              Editar
+            </v-btn>
           </template>
         </v-data-table>
       </v-col>
@@ -84,7 +44,7 @@
                 </v-col>
                 <v-col cols="12" v-if="tipoEdit == 2">
                   <v-autocomplete
-                    :items="permisos"
+                    :items="tiposEmp"
                     v-model="permisoE"
                     :rules="permisoRules"
                     item-value="id_permiso"
@@ -115,27 +75,31 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <EditEmpleado ref="formEdit" :tiposEmp="tiposEmp" @refresh="getEmpleados" />
   </v-container>
 </template>
 <script>
 import { mapState } from "vuex";
 import axios from "axios";
-import NewUser from './NewUser';
+import NevoEmpleado from './NevoEmpleado';
+import EditEmpleado from './EditEmpleado';
 export default {
-  name: "IndexUsuarios",
+  name: "IndexEmpleados",
   components: {
-    NewUser
+    NevoEmpleado,
+    EditEmpleado
   },
   data: () => ({
-    dataUsers:[],
+    dataEmpleados:[],
     headers: [
-      { text: "Correo", value: "email" },
-      { text: "Tipo", value: "permiso" },
-      { text: "Cambiar Contraseña", value: "pass" },
-      { text: "Estatus", value: "estatus" },
+      { text: "Nombre(s)", value: "nombreEmpleado" },
+      { text: "Apellidos", value: "apellidosEmpleado" },
+      { text: "Clave", value: "claveAcceso" },
+      { text: "Tipo", value: "tipo" },
+      { text: "Acción", value: "action" },
     ],
-    loadingU: false,
-    permisos: [],
+    loadingE: false,
+    tiposEmp: [],
     loadingP: false,
     dialogEdit: false,
     tipoEdit: null,
@@ -151,22 +115,22 @@ export default {
     buttonSaveEdit: false
   }),
   created(){
-    this.getPermisos();
-    this.getUsuarios();
+    this.getTipoEmpleado();
+    this.getEmpleados();
   },
   computed: {
     ...mapState(["BASE_URL","AuthToken"]),
   },
   methods: {
-    async getPermisos(){
+    async getTipoEmpleado(){
       this.loadingP = true;
-      this.permisos = [];
+      this.tiposEmp = [];
       try {
-        const path = `${this.BASE_URL}usuarios/getPermisos/`;
+        const path = `${this.BASE_URL}empleados/getTipoEmpleado/`;
         let res = await axios.get(path, this.AuthToken);
         //console.log(res.data);
         if(res.data.status == 'OK'){
-          this.permisos = res.data.res;
+          this.tiposEmp = res.data.res;
         }else{
           
         }
@@ -177,25 +141,44 @@ export default {
       }
       this.loadingP = false;
     },
-    async getUsuarios(){
-      this.loadingU = true;
-      this.dataUsers = [];
+    async getEmpleados(){
+      this.loadingE = true;
+      this.dataEmpleados = [];
       try {
-        const path = `${this.BASE_URL}usuarios/getUsuarios/`;
+        const path = `${this.BASE_URL}empleados/getEmpleados/`;
         let res = await axios.get(path, this.AuthToken);
         //console.log(res.data);
         if(res.data.status == 'OK'){
-          this.dataUsers = res.data.res;
+          this.dataEmpleados = res.data.res;
         }else{
           
         }
-        this.loadingU = false;
+        this.loadingE = false;
       } catch (error) {
         console.log(error)
         this.alert('Error!','Revise su conexión o comuniquese a soporte','error', 2000);
       }
-      this.loadingU = false;
+      this.loadingE = false;
     },
+    edit(empleado){
+      this.$refs.formEdit.openDialog(empleado);
+    },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     openEdit(id_usuario, data, tipo){
       tipo == 1 ? this.emailEdit = data : this.permisoE = data;
       this.id_usuarioE = id_usuario;
@@ -222,9 +205,9 @@ export default {
       data.append("pass", pass);
       try {
         let res = await axios.post(path, data, this.AuthToken);
-        console.log(res.data);
+        //console.log(res.data);
         if(res.data.res == true){
-          this.getUsuarios();
+          this.getEmpleados();
           this.alert('Contraseña actualizada!',' ','success', 2000);
         }else{
           this.alert('Ocurrió un error!','Inténtalo de nuevo','error', 2000);
@@ -258,7 +241,7 @@ export default {
           case 'OK':
             this.alert('¡Guardado!',' ','success', 2000);
             this.closeDialog();
-            this.getUsuarios();
+            this.getEmpleados();
             break;
 
           case 'error':
@@ -288,7 +271,7 @@ export default {
         }else{
           this.alert('Ocurrió un error!','Inténtalo de nuevo','error', 2000);
         }
-        this.getUsuarios();
+        this.getEmpleados();
       } catch (error) {
         console.log(error)
         this.alert('Error!','Revise su conexión o comuniquese a soporte','error', 2000);

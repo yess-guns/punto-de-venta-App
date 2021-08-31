@@ -116,7 +116,7 @@
       <v-tab-item value="tab-Empleados">
         <v-card flat>
           <v-card-text>
-            Empleados
+            <Empleados />
           </v-card-text>
         </v-card>
       </v-tab-item>
@@ -132,6 +132,7 @@ import IndexIProductos from '@/views/admin/productos/Index';
 import IndexVentas from '@/views/admin/ventas/Index';
 import ReporteVentas from '@/views/admin/ventas/ReporteVentas';
 import Usuarios from '../../views/admin/usuarios/Index';
+import Empleados from '../../views/admin/empleados/Index';
 export default {
   name: "Admin",
   components: {
@@ -140,6 +141,7 @@ export default {
     IndexVentas,
     ReporteVentas,
     Usuarios,
+    Empleados
   },
   data: () => ({
     tab: null,
